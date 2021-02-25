@@ -63,6 +63,7 @@ class AppSettings:
         if not download_dir.is_absolute():
              cls._log.warning(f'"{download_dir}" is not a valid path. The download directory must be an '
                                  f'absolute path, such as "/manga". Please select a new download path.')
+             sys.exit("INVALID PATH, SET A VALID PATH !")
         if not Path(download_dir).exists():
              cls._log.info(f'Library directory "{AppSettings.library_dir}" does not exist; creating now.')
              Path(download_dir).mkdir()
