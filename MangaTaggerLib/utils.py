@@ -57,8 +57,17 @@ class AppSettings:
         Database.initialize()
         Database.print_debug_settings()
 
-        # Free Manga Downloader Configuration
-        cls._initialize_fmd_settings(settings['fmd']['fmd_dir'], settings['fmd']['download_dir'])
+        # Download Directory Configuration
+         # Set the download directory
+        download_dir = Path(settings['application']['library']['download_dir'])
+        if not download_dir.is_absolute():
+             cls._log.warning(f'"{download_dir}" is not a valid path. The download directory must be an '
+                                 f'absolute path, such as "/manga". Please select a new download path.')
+        if not Path(download_dir).exists():
+             cls._log.info(f'Library directory "{AppSettings.library_dir}" does not exist; creating now.')
+             Path(download_dir).mkdir()
+        QueueWorker.download_dir = download_dir
+        cls._log.info(f'Download directory has been set as "{QueueWorker.download_dir}"')
 
         # Set Application Timezone
         cls.timezone = settings['application']['timezone']
@@ -123,87 +132,6 @@ class AppSettings:
         # Register function to be run prior to application termination
         atexit.register(cls._exit_handler)
         cls._log.debug(f'{cls.__name__} class has been initialized')
-
-    @classmethod
-    def _initialize_fmd_settings(cls, fmd_dir, download_dir):
-        cls._log.info('Now setting Free Manga Downloader configuration settings...')
-
-        fmd_settings_path = Path(fmd_dir, 'userdata', 'settings.json')
-
-        # If FMD is running, stop it
-        for process in psutil.process_iter():
-            if 'fmd.exe' == process.name():
-                cls._log.info('Free Manga Downloader is currently running and must be closed for Manga Tagger to '
-                              'initialize the FMD settings properly.')
-                process.terminate()
-
-        # If FMD settings has not been initialized, start and stop FMD to generate the settings.json file, so that we
-        # can then set the download path
-        if not fmd_settings_path.exists():
-            cls._log.info('The settings.json for Free Manga Downloader (FMD) does not exist, meaning that FMD has '
-                          'not been opened before. Opening the application to generate the settings.json...')
-
-            Tk().withdraw()
-            messagebox.showinfo('Manga Tagger', 'For Manga Tagger to continue, the settings.json for Free Manga '
-                                                'Downloader (FMD) must first be generated. After clicking "OK", FMD '
-                                                'will open. Please click "No" to any module update pop-ups and close '
-                                                'FMD using the "X" in the upper right-hand corner.')
-
-            subprocess.run(str(Path(fmd_dir, 'fmd.exe')))
-
-            if download_dir is None:
-                cls._log.info('Download directory has not been set; a file dialog window will be opened to input '
-                              'the destination download directory.')
-                Tk().withdraw()
-                download_dir = Path(filedialog.askdirectory(title='Select the folder where you want your manga to be '
-                                                                  'downloaded to'))
-
-        # Load settings
-        with open(fmd_settings_path, 'r') as fmd_settings:
-            settings_json = json.load(fmd_settings)
-        changes_made = False
-
-        # GenerateMangaFolder MUST BE TRUE in order to properly parse the download directory
-        if settings_json['saveto']['GenerateMangaFolder'] is False:
-            settings_json['saveto']['GenerateMangaFolder'] = True
-            settings_json['saveto']['MangaCustomRename'] = '%MANGA%'
-            changes_made = True
-            cls._log.info('Setting "Generate Manga Folder" should be enabled with "Manga Custom Rename" '
-                          f'configured as "%MANGA%"; this configuration has been applied')
-
-        # ChapterCustomRename MUST FOLLOW this format to be properly parsed
-        if settings_json['saveto']['ChapterCustomRename'].find('-.-') == -1 \
-                or settings_json['saveto']['ChapterCustomRename'] != '%MANGA% -.- %CHAPTER%':
-            settings_json['saveto']['ChapterCustomRename'] = '%MANGA% -.- %CHAPTER%'
-            changes_made = True
-            cls._log.info('Setting "Chapter Custom Rename" should be configured as "%MANGA% -.- '
-                          f'%CHAPTER%" for parsing by Manga Tagger; this configuration has been applied')
-
-        # Set the download format to CBZ
-        if settings_json['saveto']['Compress'] != 2:
-            settings_json['saveto']['Compress'] = 2
-            changes_made = True
-            cls._log.info('Setting "Compress" should be set to 2, which corresponds to the CBZ file format.')
-
-        # Set the download directory
-        if download_dir is None:
-            download_dir = Path(settings_json['saveto']['SaveTo'])
-
-            if not download_dir.is_absolute():
-                cls._log.warning(f'"{download_dir}" is not a valid path. The download directory must be an '
-                                 f'absolute path, such as "C:\\Downloads". Please select a new download path.')
-
-                Tk().withdraw()
-                download_dir = Path(filedialog.askdirectory(title='Select the folder where you want your manga to be '
-                                                                  'downloaded to'))
-
-        QueueWorker.download_dir = download_dir
-        cls._log.info(f'Download directory has been set as "{QueueWorker.download_dir}"')
-
-        if changes_made:
-            with open(Path(fmd_dir, 'userdata', 'settings.json'), 'w') as fmd_settings:
-                json.dump(settings_json, fmd_settings, indent=4)
-                cls._log.debug(f'Changes to the "settings.json" for Free Manga Downloader have been saved')
 
     @classmethod
     def _initialize_logger(cls, settings):
@@ -289,15 +217,15 @@ class AppSettings:
     @classmethod
     def _create_settings(cls):
         Tk().withdraw()
-        fmd_dir = filedialog.askdirectory(title='Select the folder that Free Manga Downloader is installed in')
 
         return {
             "application": {
                 "debug_mode": False,
                 "timezone": "America/New_York",
                 "library": {
-                    "dir": "C:\\Library",
-                    "is_network_path": False
+                    "dir": "/manga/library",
+                    "is_network_path": False,
+                    "download_dir": "/manga"
                 },
                 "dry_run": {
                     "enabled": False,
@@ -348,10 +276,6 @@ class AppSettings:
                     "port": 1798,
                     "log_format": "%(threadName)s %(thread)d %(asctime)s %(name)s %(levelname)s %(message)s"
                 }
-            },
-            "fmd": {
-                "fmd_dir": fmd_dir,
-                "download_dir": None
             }
         }
 
