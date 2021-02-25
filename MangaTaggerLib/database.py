@@ -1,5 +1,6 @@
 import logging
 import sys
+import shutil
 from datetime import datetime
 from pathlib import Path
 from queue import Queue
@@ -177,7 +178,7 @@ class ProcFilesTable(Database):
 
     @classmethod
     def insert_record_and_rename(cls, old_file_path: Path, new_file_path: Path, manga_title, chapter, logging_info):
-        old_file_path.rename(new_file_path)
+        shutil.move(old_file_path, new_file_path)
         cls._log.info(f'"{new_file_path.name.strip(".cbz")}" has been renamed.', extra=logging_info)
 
         record = {
