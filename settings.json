@@ -20,7 +20,7 @@
 	},
 	"database": {
 		"database_name": "manga_tagger",
-		"host_address": "192.168.0.2",
+		"host_address": "localhost",
 		"port": 27017,
 		"username": "manga_tagger",
 		"password": "Manga4LYFE",
@@ -28,7 +28,7 @@
 		"server_selection_timeout_ms": 1
 	},
 	"logger": {
-		"logging_level": "debug",
+		"logging_level": "info",
 		"log_dir": "logs",
 		"max_size": 10485760,
 		"backup_count": 5,
