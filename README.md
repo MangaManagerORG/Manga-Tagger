@@ -1,3 +1,6 @@
+This fork doesn't require FMD2. Running MangaTagger.py will make it watch the directory configured in the settings.json.
+
+
 ![GitHub all releases](https://img.shields.io/github/downloads/Inpacchi/Manga-Tagger/total)
 ![GitHub issues](https://img.shields.io/github/issues/Inpacchi/Manga-Tagger)
 
