@@ -1,4 +1,5 @@
 This fork doesn't require FMD2. Running MangaTagger.py will make it watch the directory configured in the settings.json.
+
 input Files and folders still have to be named like this : %MANGA%/%MANGA% -.- %CHAPTER%.cbz
 
 
