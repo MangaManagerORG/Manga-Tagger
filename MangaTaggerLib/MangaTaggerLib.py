@@ -1,5 +1,6 @@
 import logging
 import time
+import re
 from datetime import datetime
 from os import path
 from pathlib import Path
@@ -160,18 +161,14 @@ def file_renamer(filename, logging_info):
 
         chapter_title = chapter_title.replace(' ', '')
 
-        if 'chapter' in chapter_title:
-            delimiter = 'chapter'
-            delimiter_index = 7
-        elif 'ch.' in chapter_title:
-            delimiter = 'ch.'
-            delimiter_index = 3
-        elif 'ch' in chapter_title:
-            delimiter = 'ch'
-            delimiter_index = 2
-        elif 'act' in chapter_title:
-            delimiter = 'act'
-            delimiter_index = 3
+        chapter_title_pattern = "\D+"
+        p = re.compile(chapter_title_pattern)
+        isparsable = p.match(chapter_title)
+        chapter_title_name = isparsable.group(0)
+
+        if isparsable:
+             delimiter = chapter_title_name
+             delimiter_index = len(chapter_title_name)
         else:
             raise UnparsableFilenameError(filename, 'ch/chapter')
     except UnparsableFilenameError as ufe:
