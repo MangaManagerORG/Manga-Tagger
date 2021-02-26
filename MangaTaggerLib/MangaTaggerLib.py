@@ -161,12 +161,23 @@ def file_renamer(filename, logging_info):
 
         chapter_title = chapter_title.replace(' ', '')
 
-        chapter_title_pattern = "\D+"
-        p = re.compile(chapter_title_pattern)
-        isparsable = p.match(chapter_title)
-        chapter_title_name = isparsable.group(0)
+        # Match "V05-Chapter" "S005-Chapter15" "V05-GAME005" without the chapter number, we removed spaces above
+        volume_chapter_title_pattern = "\D+\d*[.,]?\d*-\D+"
 
-        if isparsable:
+	# Match "Chapter5" "GAME005" "Page/005" "ACT-50" "#505" without the chapter number, we removed spaces above
+        chapter_title_pattern = "\D+"
+
+        if re.match(volume_chapter_title_pattern, chapter_title):
+             p = re.compile(volume_chapter_title_pattern)
+             prog = p.match(chapter_title)
+             chapter_title_name = prog.group(0)
+             delimiter = chapter_title_name
+             delimiter_index = len(chapter_title_name)
+
+        elif re.match(chapter_title_pattern, chapter_title):
+             p = re.compile(chapter_title_pattern)
+             prog = p.match(chapter_title)
+             chapter_title_name = prog.group(0)
              delimiter = chapter_title_name
              delimiter_index = len(chapter_title_name)
         else:
