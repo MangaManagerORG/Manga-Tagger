@@ -1,9 +1,11 @@
 import logging
 import time
 import re
+import requests
 from datetime import datetime
 from os import path
 from pathlib import Path
+from PIL import Image
 from requests.exceptions import ConnectionError
 from xml.etree.ElementTree import SubElement, Element, Comment, tostring
 from xml.dom.minidom import parseString
@@ -362,6 +364,11 @@ def metadata_tagger(manga_title, manga_chapter_number, logging_info, manga_file_
             ProcSeriesTable.processed_series.add(manga_title)
             CURRENTLY_PENDING_DB_SEARCH.remove(manga_title)
 
+        if AppSettings.image_dir is not None and not Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
+            LOG.info(f'Image directory configured but cover not found. Send request to Anilist for necessary data.', extra=logging_info)
+            manga_id = MetadataTable.search_id_by_search_value(manga_title)
+            anilist_details = AniList.search_staff_by_mal_id(manga_id, logging_info)
+
         manga_metadata = Metadata(manga_title, logging_info, details=manga_search)
         logging_info['metadata'] = manga_metadata.__dict__
     else:
@@ -439,7 +446,16 @@ def metadata_tagger(manga_title, manga_chapter_number, logging_info, manga_file_
     if AppSettings.mode_settings is None or ('write_comicinfo' in AppSettings.mode_settings.keys()
                                              and AppSettings.mode_settings['write_comicinfo']):
         comicinfo_xml = construct_comicinfo_xml(manga_metadata, manga_chapter_number, logging_info)
-        reconstruct_manga_chapter(comicinfo_xml, manga_file_path, logging_info)
+        reconstruct_manga_chapter(manga_title, comicinfo_xml, manga_file_path, logging_info)
+        
+        if AppSettings.image_dir is not None:
+            if not Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
+                LOG.info('Downloading series cover image...', extra=logging_info)
+                download_cover_image(manga_title, anilist_details['coverImage']['extraLarge'])
+            else:
+                LOG.info('Serie cover image already exist, not downloading.', extra=logging_info)
+        else:
+            LOG.info('Image Directory not set, not downloading series cover image.', extra=logging_info)
 
     return manga_metadata
 
@@ -597,9 +613,11 @@ def construct_comicinfo_xml(metadata, chapter_number, logging_info):
     return parseString(tostring(comicinfo)).toprettyxml(indent="   ")
 
 
-def reconstruct_manga_chapter(comicinfo_xml, manga_file_path, logging_info):
+def reconstruct_manga_chapter(manga_title, comicinfo_xml, manga_file_path, logging_info):
     try:
         with ZipFile(manga_file_path, 'a') as zipfile:
+            if AppSettings.image_dir is not None and Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
+                zipfile.write(f'{AppSettings.image_dir}/{manga_title}_cover.jpg', '000_cover.jpg')
             zipfile.writestr('ComicInfo.xml', comicinfo_xml)
     except Exception as e:
         LOG.exception(e, extra=logging_info)
@@ -608,3 +626,8 @@ def reconstruct_manga_chapter(comicinfo_xml, manga_file_path, logging_info):
         return
 
     LOG.info(f'ComicInfo.xml has been created and appended to "{manga_file_path}".', extra=logging_info)
+
+def download_cover_image(manga_title, image_url):
+    image = requests.get(image_url)
+    with open(f'{AppSettings.image_dir}/{manga_title}_cover.jpg', 'wb') as image_file:
+        image_file.write(image.content)

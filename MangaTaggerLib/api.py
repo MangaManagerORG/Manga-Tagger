@@ -66,7 +66,6 @@ class MTJikan(Jikan):
         self.session.close()
         return search_results
 
-
 class AniList:
     _log = None
 
@@ -96,6 +95,9 @@ class AniList:
         query search_staff_by_mal_id ($mal_id: Int) {
           Media (idMal: $mal_id, type: MANGA) {
             siteUrl
+            coverImage {
+              extraLarge
+            }
             staff {
               edges {
                 node{

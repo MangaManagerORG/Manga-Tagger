@@ -21,6 +21,7 @@ class AppSettings:
     timezone = None
     version = None
 
+    image_dir = None
     library_dir = None
     is_network_path = None
 
@@ -101,6 +102,16 @@ class AppSettings:
             QueueWorker._debug_mode = True
 
         cls._log.debug(f'Debug Mode: {QueueWorker._debug_mode}')
+
+        # Image Directory
+        if settings['application']['image_dir'] is not None:
+            cls.image_dir = settings['application']['image_dir']
+            if not Path(cls.image_dir).exists():
+                cls._log.info(f'Image directory "{cls.image_dir}" does not exist; creating now.')
+                Path(cls.image_dir).mkdir()
+            cls._log.debug(f'Image Directory: {cls.image_dir}')
+        else:
+            cls._log.debug(f'Image Directory not configured')
 
         # Manga Library Configuration
         if settings['application']['library']['dir'] is not None:
@@ -223,6 +234,7 @@ class AppSettings:
             "application": {
                 "debug_mode": False,
                 "timezone": "America/New_York",
+                "image_dir": "/manga",
                 "library": {
                     "dir": "/manga/library",
                     "is_network_path": False,
