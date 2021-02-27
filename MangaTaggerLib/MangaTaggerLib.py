@@ -445,9 +445,7 @@ def metadata_tagger(manga_title, manga_chapter_number, logging_info, manga_file_
 
     if AppSettings.mode_settings is None or ('write_comicinfo' in AppSettings.mode_settings.keys()
                                              and AppSettings.mode_settings['write_comicinfo']):
-        comicinfo_xml = construct_comicinfo_xml(manga_metadata, manga_chapter_number, logging_info)
-        reconstruct_manga_chapter(manga_title, comicinfo_xml, manga_file_path, logging_info)
-        
+
         if AppSettings.image_dir is not None:
             if not Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
                 LOG.info('Downloading series cover image...', extra=logging_info)
@@ -456,6 +454,9 @@ def metadata_tagger(manga_title, manga_chapter_number, logging_info, manga_file_
                 LOG.info('Serie cover image already exist, not downloading.', extra=logging_info)
         else:
             LOG.info('Image Directory not set, not downloading series cover image.', extra=logging_info)
+
+        comicinfo_xml = construct_comicinfo_xml(manga_metadata, manga_chapter_number, logging_info)
+        reconstruct_manga_chapter(manga_title, comicinfo_xml, manga_file_path, logging_info)
 
     return manga_metadata
 
