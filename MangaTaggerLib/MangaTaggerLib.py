@@ -165,8 +165,8 @@ def file_renamer(filename, logging_info):
         chapter_title = re.sub('\D+$', '', chapter_title)
         # Removed space and any character that are not number. Usually that's the name of the chapter.
 
-        # Match "V05-Chapter" "S005-Chapter15" "V05-GAME005" without the chapter number, we removed spaces above
-        volume_chapter_title_pattern = "\D+\d*[.,]?\d*-\D+"
+        # Match "V05-Chapter" "S005-Chapter15" "V05-GAME005" "V056CHap560" "S200#250" without the chapter number, we removed spaces above
+        volume_chapter_title_pattern = "\D+\d*[.,]?\d*\D+"
 
 	# Match "Chapter5" "GAME005" "Page/005" "ACT-50" "#505" without the chapter number, we removed spaces above
         chapter_title_pattern = "\D+"
