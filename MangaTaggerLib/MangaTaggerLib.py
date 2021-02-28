@@ -162,6 +162,8 @@ def file_renamer(filename, logging_info):
             return f'{manga_title} {path.splitext(filename[1])[0]}.cbz', 'oneshot'
 
         chapter_title = chapter_title.replace(' ', '')
+        chapter_title = re.sub('\D+$', '', chapter_title)
+        # Removed space and any character that are not number. Usually that's the name of the chapter.
 
         # Match "V05-Chapter" "S005-Chapter15" "V05-GAME005" without the chapter number, we removed spaces above
         volume_chapter_title_pattern = "\D+\d*[.,]?\d*-\D+"
