@@ -118,35 +118,56 @@ class Metadata:
 
             for j_staff in jikan_staff:
                 for a_name in names_to_compare:
-                    if compare(a_name, j_staff['name']) > .7:
                         Metadata._log.debug(f'Staff Member (MyAnimeList): {j_staff}')
-
+                        
+                ## keep not matched anilist staff, with less data, in jikan vs anilist staff
+                ## Always add every staff shown on Anilist, if no MAL match then less infos is stored
+                ## Fixes cases like Solo Leveling where Art and Story authors are available but one isn't matching MAL's result
+ 
                         role = a_staff['role'].lower()
                         if 'story & art' in role:
                             roles.append('story')
                             roles.append('art')
-                            self._add_staff_member('story', a_staff, j_staff)
-                            self._add_staff_member('art', a_staff, j_staff)
+                            if compare(a_name, j_staff['name']) > .7:
+                                self._add_staff_member('story', a_staff, j_staff)
+                                self._add_staff_member('art', a_staff, j_staff)
+                            else:
+                                self._add_anilist_staff_member('story', a_staff)
+                                self._add_anilist_staff_member('art', a_staff)
                             break
                         elif 'story' in role:
                             roles.append('story')
-                            self._add_staff_member('story', a_staff, j_staff)
+                            if compare(a_name, j_staff['name']) > .7:
+                                self._add_staff_member('story', a_staff, j_staff)
+                            else:
+                                self._add_anilist_staff_member('story', a_staff)
                             break
                         elif 'art' in role:
                             roles.append('art')
-                            self._add_staff_member('art', a_staff, j_staff)
+                            if compare(a_name, j_staff['name']) > .7:
+                                self._add_staff_member('art', a_staff, j_staff)
+                            else:
+                                self._add_anilist_staff_member('art', a_staff)
                             break
                         else:
                             Metadata._log.warning(f'Expected role not found for staff member "{a_name}"; instead'
                                                   f' found "{role}"', extra=logging_info)
                             break
-
+                
         # Validate expected roles for staff members
         role_set = ['story', 'art']
 
         if set(roles) != set(role_set):
+
             Metadata._log.warning(f'Not all expected roles are present for series "{self.search_value}"; '
                                   f'double check ID "{self._id}"', extra=logging_info)
+
+    def _add_anilist_staff_member(self, role, a_staff):
+        self.staff[role][a_staff['node']['name']['full']] = {
+            'first_name': a_staff['node']['name']['first'],
+            'last_name': a_staff['node']['name']['last'],
+            'anilist_url': a_staff['node']['siteUrl'],
+        }
 
     def _add_staff_member(self, role, a_staff, j_staff):
         self.staff[role][a_staff['node']['name']['full']] = {
