@@ -502,7 +502,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
             LOG.info('Image Directory not set, not downloading series cover image.', extra=logging_info)
 
         comicinfo_xml = construct_comicinfo_xml(manga_metadata, manga_chapter_number, logging_info)
-        reconstruct_manga_chapter(manga_title, comicinfo_xml, new_file_path, logging_info)
+        reconstruct_manga_chapter(new_filename, comicinfo_xml, new_file_path, logging_info)
 
     LOG.info(f'Processing on "{new_file_path}" has finished.', extra=logging_info)
     return manga_metadata
