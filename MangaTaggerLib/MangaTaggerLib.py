@@ -399,7 +399,11 @@ def metadata_tagger(manga_title, manga_chapter_number, logging_info, manga_file_
                     LOG.info(f'Comparing titles found for "{manga_title}"...', extra=logging_info)
                     comparison_values = compare_titles(manga_title, jikan_titles, anilist_titles, logging_info)
 
-                    if comparison_values is None:
+                    if AppSettings.disable_ani_compare:
+                        LOG.info(f'ani_compare disabled, MAL search result will not be compared against Anilist for {manga_title}', extra=logging_info)
+                        manga_found = True
+                        break
+                    elif comparison_values is None:
                         continue
                     elif any(value > .8 for value in comparison_values):
                         LOG.info(f'Match found for {manga_title}', extra=logging_info)
