@@ -160,16 +160,16 @@ class MetadataTable(Database):
         })
     
     @classmethod
-    def search_value_by_(cls, search_value):
-         cls._log.debug(f'Searching manga_metadata cls by key "series_id" using value "{search_value}"')
-         return cls._database.find_one({"search_value": search_value}, {"_id": 1})
-
-
-    @classmethod
     def search_id_by_search_value(cls, manga_title):
-        cls._log.debug(f'Searching manga_metadata cls by key "series_id" using value "{manga_title}"')
+        cls._log.debug(f'Searching "series_id" using value "{manga_title}"')
         cursor = cls._database.find_one({"search_value": manga_title}, {"_id": 1})
         return cursor['_id']
+
+    @classmethod
+    def search_series_title_by_search_value(cls, manga_title):
+        cls._log.debug(f'Searching "series_title" using value "{manga_title}"')
+        cursor = cls._database.find_one({"search_value": manga_title}, {"series_title": 1})
+        return cursor['series_title']
 
 class ProcFilesTable(Database):
     @classmethod

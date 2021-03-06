@@ -63,50 +63,6 @@ def process_manga_chapter(file_path: Path, event_id):
 
     manga_details = file_renamer(filename, logging_info)
 
-    try:
-        new_filename = manga_details[0]
-        LOG.debug(f'new_filename: {new_filename}')
-    except TypeError:
-        LOG.warning(f'Manga Tagger was unable to process "{file_path}"', extra=logging_info)
-        return None
-
-    manga_library_dir = Path(AppSettings.library_dir, directory_name)
-    LOG.debug(f'Manga Library Directory: {manga_library_dir}')
-
-    if not manga_library_dir.exists():
-        LOG.info(f'A directory for "{directory_name}" in "{AppSettings.library_dir}" does not exist; creating now.')
-        manga_library_dir.mkdir()
-
-    new_file_path = Path(manga_library_dir, new_filename)
-    LOG.debug(f'new_file_path: {new_file_path}')
-
-    LOG.info(f'Checking for current and previously processed files with filename "{new_filename}"...',
-             extra=logging_info)
-
-    if AppSettings.mode_settings is None or AppSettings.mode_settings['rename_file']:
-        try:
-            # Multithreading Optimization
-            if new_file_path in CURRENTLY_PENDING_RENAME:
-                LOG.info(f'A file is currently being renamed under the filename "{new_filename}". Locking '
-                         f'{file_path} from further processing until this rename action is complete...',
-                         extra=logging_info)
-
-                while new_file_path in CURRENTLY_PENDING_RENAME:
-                    time.sleep(1)
-
-                LOG.info(f'The file being renamed to "{new_file_path}" has been completed. Unlocking '
-                         f'"{new_filename}" for file rename processing.', extra=logging_info)
-            else:
-                LOG.info(f'No files currently currently being processed under the filename '
-                         f'"{new_filename}". Locking new filename for processing...', extra=logging_info)
-                CURRENTLY_PENDING_RENAME.add(new_file_path)
-
-            rename_action(file_path, new_file_path, directory_name, manga_details[1], logging_info)
-        except (FileExistsError, FileUpdateNotRequiredError, FileAlreadyProcessedError) as e:
-            LOG.exception(e, extra=logging_info)
-            CURRENTLY_PENDING_RENAME.remove(new_file_path)
-            return
-
     # More Multithreading Optimization
     if directory_name in ProcSeriesTable.processed_series:
         LOG.info(f'"{directory_name}" has been processed as a searched series and will continue processing.',
@@ -128,9 +84,7 @@ def process_manga_chapter(file_path: Path, event_id):
                      extra=logging_info)
             CURRENTLY_PENDING_DB_SEARCH.add(directory_name)
 
-    metadata_tagger(directory_name, manga_details[1], logging_info, new_file_path)
-    LOG.info(f'Processing on "{new_file_path}" has finished.', extra=logging_info)
-
+    metadata_tagger(file_path, directory_name, manga_details[1], logging_info)
 
 def file_renamer(filename, logging_info):
     LOG.info(f'Attempting to rename "{filename}"...', extra=logging_info)
@@ -325,7 +279,7 @@ def compare_versions(old_filename: str, new_filename: str):
         return False
 
 
-def metadata_tagger(manga_title, manga_chapter_number, logging_info, manga_file_path=None):
+def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
     manga_search = None
     db_exists = True
     retries = 0
@@ -358,6 +312,46 @@ def metadata_tagger(manga_title, manga_chapter_number, logging_info, manga_file_
             db_exists = False
 
     if db_exists:
+        series_title = MetadataTable.search_series_title_by_search_value(manga_title)
+        manga_library_dir = Path(AppSettings.library_dir, series_title)
+        if not manga_library_dir.exists():
+            LOG.info(f'A directory for "{jikan_titles.get("title")}" in "{AppSettings.library_dir}" does not exist; creating now.')
+            manga_library_dir.mkdir()
+        try:
+            new_filename = f"{series_title} {manga_chapter_number}.cbz"
+            LOG.debug(f'new_filename: {new_filename}')
+        except TypeError:
+            LOG.warning(f'Manga Tagger was unable to process "{file_path}"', extra=logging_info)
+            return None
+        new_file_path = Path(manga_library_dir, new_filename)
+
+        LOG.info(f'Checking for current and previously processed files with filename "{new_filename}"...',
+			 extra=logging_info)
+
+        if AppSettings.mode_settings is None or AppSettings.mode_settings['rename_file']:
+            try:
+            # Multithreading Optimization
+                if new_file_path in CURRENTLY_PENDING_RENAME:
+                    LOG.info(f'A file is currently being renamed under the filename "{new_filename}". Locking '
+			 f'{file_path} from further processing until this rename action is complete...',
+				 extra=logging_info)
+
+                    while new_file_path in CURRENTLY_PENDING_RENAME:
+                        time.sleep(1)
+
+                    LOG.info(f'The file being renamed to "{new_file_path}" has been completed. Unlocking '
+			 f'"{new_filename}" for file rename processing.', extra=logging_info)
+                else:
+                    LOG.info(f'No files currently currently being processed under the filename '
+		         f'"{new_filename}". Locking new filename for processing...', extra=logging_info)
+                    CURRENTLY_PENDING_RENAME.add(new_file_path)
+
+                rename_action(file_path, new_file_path, series_title, manga_chapter_number, logging_info)
+            except (FileExistsError, FileUpdateNotRequiredError, FileAlreadyProcessedError) as e:
+                LOG.exception(e, extra=logging_info)
+                CURRENTLY_PENDING_RENAME.remove(new_file_path)
+                return
+
         if manga_title in ProcSeriesTable.processed_series:
             LOG.info(f'Found an entry in manga_metadata for "{manga_title}".', extra=logging_info)
         else:
@@ -440,6 +434,52 @@ def metadata_tagger(manga_title, manga_chapter_number, logging_info, manga_file_
         manga_metadata = Metadata(manga_title, logging_info, jikan_details, anilist_details)
         logging_info['metadata'] = manga_metadata.__dict__
 
+        try:
+            new_filename = f"{jikan_titles.get('title')} {manga_chapter_number}.cbz"
+            LOG.debug(f'new_filename: {new_filename}')
+        except TypeError:
+            LOG.warning(f'Manga Tagger was unable to process "{file_path}"', extra=logging_info)
+            return None
+
+        manga_library_dir = Path(AppSettings.library_dir, jikan_titles.get('title'))
+        LOG.debug(f'Manga Library Directory: {manga_library_dir}')
+
+        if not manga_library_dir.exists():
+            LOG.info(f'A directory for "{jikan_titles.get("title")}" in "{AppSettings.library_dir}" does not exist; creating now.')
+            manga_library_dir.mkdir()
+
+        new_file_path = Path(manga_library_dir, new_filename)
+        LOG.debug(f'new_file_path: {new_file_path}')
+
+        LOG.info(f'Checking for current and previously processed files with filename "{new_filename}"...',
+			 extra=logging_info)
+
+        if AppSettings.mode_settings is None or AppSettings.mode_settings['rename_file']:
+            try:
+	    # Multithreading Optimization
+                if new_file_path in CURRENTLY_PENDING_RENAME:
+                    LOG.info(f'A file is currently being renamed under the filename "{new_filename}". Locking '
+			 f'{file_path} from further processing until this rename action is complete...',
+						 extra=logging_info)
+
+                    while new_file_path in CURRENTLY_PENDING_RENAME:
+                        time.sleep(1)
+
+                    LOG.info(f'The file being renamed to "{new_file_path}" has been completed. Unlocking '
+				 f'"{new_filename}" for file rename processing.', extra=logging_info)
+                else:
+                    LOG.info(f'No files currently currently being processed under the filename '
+				 f'"{new_filename}". Locking new filename for processing...', extra=logging_info)
+                    CURRENTLY_PENDING_RENAME.add(new_file_path)
+
+                rename_action(file_path, new_file_path, jikan_titles.get("title"), manga_chapter_number, logging_info)
+
+            except (FileExistsError, FileUpdateNotRequiredError, FileAlreadyProcessedError) as e:
+                LOG.exception(e, extra=logging_info)
+                CURRENTLY_PENDING_RENAME.remove(new_file_path)
+                return
+
+#
         if AppSettings.mode_settings is None or ('database_insert' in AppSettings.mode_settings.keys()
                                                  and AppSettings.mode_settings['database_insert']):
             MetadataTable.insert(manga_metadata, logging_info)
@@ -462,8 +502,9 @@ def metadata_tagger(manga_title, manga_chapter_number, logging_info, manga_file_
             LOG.info('Image Directory not set, not downloading series cover image.', extra=logging_info)
 
         comicinfo_xml = construct_comicinfo_xml(manga_metadata, manga_chapter_number, logging_info)
-        reconstruct_manga_chapter(manga_title, comicinfo_xml, manga_file_path, logging_info)
+        reconstruct_manga_chapter(manga_title, comicinfo_xml, new_file_path, logging_info)
 
+    LOG.info(f'Processing on "{new_file_path}" has finished.', extra=logging_info)
     return manga_metadata
 
 
