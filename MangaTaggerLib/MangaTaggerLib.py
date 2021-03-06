@@ -357,12 +357,12 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
         else:
             LOG.info(f'Found an entry in manga_metadata for "{manga_title}"; unlocking series for processing.',
                      extra=logging_info)
-            ProcSeriesTable.processed_series.add(manga_title)
-            CURRENTLY_PENDING_DB_SEARCH.remove(manga_title)
+            ProcSeriesTable.processed_series.add(series_title)
+            CURRENTLY_PENDING_DB_SEARCH.remove(series_title)
 
         if AppSettings.image_dir is not None and not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
             LOG.info(f'Image directory configured but cover not found. Send request to Anilist for necessary data.', extra=logging_info)
-            manga_id = MetadataTable.search_id_by_search_value(manga_title)
+            manga_id = MetadataTable.search_id_by_search_value(series_title)
             anilist_details = AniList.search_staff_by_mal_id(manga_id, logging_info)
 
         manga_metadata = Metadata(manga_title, logging_info, details=manga_search)
@@ -489,7 +489,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
         LOG.info(f'Retrieved metadata for "{series_title}" from the Anilist and MyAnimeList APIs; '
                  f'now unlocking series for processing!', extra=logging_info)
         ProcSeriesTable.processed_series.add(series_title)
-        CURRENTLY_PENDING_DB_SEARCH.remove(manga_title)
+        CURRENTLY_PENDING_DB_SEARCH.remove(series_title)
 
     if AppSettings.mode_settings is None or ('write_comicinfo' in AppSettings.mode_settings.keys()
                                              and AppSettings.mode_settings['write_comicinfo']):
