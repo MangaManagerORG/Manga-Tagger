@@ -315,7 +315,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
         series_title = MetadataTable.search_series_title_by_search_value(manga_title)
         manga_library_dir = Path(AppSettings.library_dir, series_title)
         if not manga_library_dir.exists():
-            LOG.info(f'A directory for "{jikan_titles.get("title")}" in "{AppSettings.library_dir}" does not exist; creating now.')
+            LOG.info(f'A directory for "{series_title}" in "{AppSettings.library_dir}" does not exist; creating now.')
             manga_library_dir.mkdir()
         try:
             new_filename = f"{series_title} {manga_chapter_number}.cbz"
@@ -360,7 +360,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
             ProcSeriesTable.processed_series.add(manga_title)
             CURRENTLY_PENDING_DB_SEARCH.remove(manga_title)
 
-        if AppSettings.image_dir is not None and not Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
+        if AppSettings.image_dir is not None and not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
             LOG.info(f'Image directory configured but cover not found. Send request to Anilist for necessary data.', extra=logging_info)
             manga_id = MetadataTable.search_id_by_search_value(manga_title)
             anilist_details = AniList.search_staff_by_mal_id(manga_id, logging_info)
@@ -434,18 +434,20 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
         manga_metadata = Metadata(manga_title, logging_info, jikan_details, anilist_details)
         logging_info['metadata'] = manga_metadata.__dict__
 
+        series_title = jikan_titles.get('title')
+
         try:
-            new_filename = f"{jikan_titles.get('title')} {manga_chapter_number}.cbz"
+            new_filename = f"{series_title} {manga_chapter_number}.cbz"
             LOG.debug(f'new_filename: {new_filename}')
         except TypeError:
             LOG.warning(f'Manga Tagger was unable to process "{file_path}"', extra=logging_info)
             return None
 
-        manga_library_dir = Path(AppSettings.library_dir, jikan_titles.get('title'))
+        manga_library_dir = Path(AppSettings.library_dir, series_title)
         LOG.debug(f'Manga Library Directory: {manga_library_dir}')
 
         if not manga_library_dir.exists():
-            LOG.info(f'A directory for "{jikan_titles.get("title")}" in "{AppSettings.library_dir}" does not exist; creating now.')
+            LOG.info(f'A directory for "{series_title}" in "{AppSettings.library_dir}" does not exist; creating now.')
             manga_library_dir.mkdir()
 
         new_file_path = Path(manga_library_dir, new_filename)
@@ -472,7 +474,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
 				 f'"{new_filename}". Locking new filename for processing...', extra=logging_info)
                     CURRENTLY_PENDING_RENAME.add(new_file_path)
 
-                rename_action(file_path, new_file_path, jikan_titles.get("title"), manga_chapter_number, logging_info)
+                rename_action(file_path, new_file_path, series_title, manga_chapter_number, logging_info)
 
             except (FileExistsError, FileUpdateNotRequiredError, FileAlreadyProcessedError) as e:
                 LOG.exception(e, extra=logging_info)
@@ -484,25 +486,25 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
                                                  and AppSettings.mode_settings['database_insert']):
             MetadataTable.insert(manga_metadata, logging_info)
 
-        LOG.info(f'Retrieved metadata for "{manga_title}" from the Anilist and MyAnimeList APIs; '
+        LOG.info(f'Retrieved metadata for "{series_title}" from the Anilist and MyAnimeList APIs; '
                  f'now unlocking series for processing!', extra=logging_info)
-        ProcSeriesTable.processed_series.add(manga_title)
+        ProcSeriesTable.processed_series.add(series_title)
         CURRENTLY_PENDING_DB_SEARCH.remove(manga_title)
 
     if AppSettings.mode_settings is None or ('write_comicinfo' in AppSettings.mode_settings.keys()
                                              and AppSettings.mode_settings['write_comicinfo']):
 
         if AppSettings.image_dir is not None:
-            if not Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
+            if not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
                 LOG.info('Downloading series cover image...', extra=logging_info)
-                download_cover_image(manga_title, anilist_details['coverImage']['extraLarge'])
+                download_cover_image(series_title, anilist_details['coverImage']['extraLarge'])
             else:
                 LOG.info('Serie cover image already exist, not downloading.', extra=logging_info)
         else:
             LOG.info('Image Directory not set, not downloading series cover image.', extra=logging_info)
 
         comicinfo_xml = construct_comicinfo_xml(manga_metadata, manga_chapter_number, logging_info)
-        reconstruct_manga_chapter(new_filename, comicinfo_xml, new_file_path, logging_info)
+        reconstruct_manga_chapter(series_title, comicinfo_xml, new_file_path, logging_info)
 
     LOG.info(f'Processing on "{new_file_path}" has finished.', extra=logging_info)
     return manga_metadata
