@@ -142,7 +142,8 @@ class AppSettings:
         QueueWorker.load_task_queue()
 
         # Scan download directory for downloads not already in database upon loading
-        cls._scan_download_dir()
+        #cls._scan_download_dir()
+        # disabled for now
 
         # Initialize API
         AniList.initialize()

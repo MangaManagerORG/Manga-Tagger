@@ -61,11 +61,11 @@ def process_manga_chapter(file_path: Path, event_id):
     LOG.debug(f'directory_path: {directory_path}')
     LOG.debug(f'directory_name: {directory_name}')
 
-    manga_details = file_renamer(filename, logging_info)
+    manga_details = filename_parser(filename, logging_info)
 
-    metadata_tagger(file_path, directory_name, manga_details[1], logging_info)
+    metadata_tagger(file_path, directory_name, manga_details, logging_info)
 
-def file_renamer(filename, logging_info):
+def filename_parser(filename, logging_info):
     LOG.info(f'Attempting to rename "{filename}"...', extra=logging_info)
 
     # Parse the manga title and chapter name/number (this depends on where the manga is downloaded from)
@@ -157,16 +157,11 @@ def file_renamer(filename, logging_info):
     else:
         chapter_number = chapter_number.zfill(5)
 
-    filename = f'{manga_title} {chapter_number}.cbz'
-
     LOG.debug(f'chapter_number: {chapter_number}')
 
     logging_info['chapter_number'] = chapter_number
-    logging_info['new_filename'] = filename
 
-    LOG.info(f'File will be renamed to "{filename}".', extra=logging_info)
-
-    return filename, chapter_number
+    return chapter_number
 
 
 def rename_action(current_file_path: Path, new_file_path: Path, manga_title, chapter_number, logging_info):
@@ -365,7 +360,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
             manga_id = MetadataTable.search_id_by_search_value(series_title)
             anilist_details = AniList.search_staff_by_mal_id(manga_id, logging_info)
 
-        manga_metadata = Metadata(manga_title, logging_info, details=manga_search)
+        manga_metadata = Metadata(series_title, logging_info, details=manga_search)
         logging_info['metadata'] = manga_metadata.__dict__
     else:
         manga_found = False
@@ -430,9 +425,6 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
         anilist_details = AniList.search_staff_by_mal_id(manga_id, logging_info)
         LOG.debug(f'jikan_details: {jikan_details}')
         LOG.debug(f'anilist_details: {anilist_details}')
-
-        manga_metadata = Metadata(manga_title, logging_info, jikan_details, anilist_details)
-        logging_info['metadata'] = manga_metadata.__dict__
 
         series_title = jikan_titles.get('title')
 
@@ -502,7 +494,9 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
                 CURRENTLY_PENDING_RENAME.remove(new_file_path)
                 return
 
-#
+        manga_metadata = Metadata(series_title, logging_info, jikan_details, anilist_details)
+        logging_info['metadata'] = manga_metadata.__dict__
+
         if AppSettings.mode_settings is None or ('database_insert' in AppSettings.mode_settings.keys()
                                                  and AppSettings.mode_settings['database_insert']):
             MetadataTable.insert(manga_metadata, logging_info)
