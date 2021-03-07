@@ -299,30 +299,6 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
             return None
         new_file_path = Path(manga_library_dir, new_filename)
 
-        # More Multithreading Optimization
-        if series_title in ProcSeriesTable.processed_series:
-            LOG.info(f'"{series_title}" has been processed as a searched series and will continue processing.',
-                     extra=logging_info)
-        else:
-            if series_title in CURRENTLY_PENDING_DB_SEARCH:
-                LOG.info(f'"{series_title}" has not been processed as a searched series but is currently pending '
-                     f'a database search. Suspending further processing until database search has finished...',
-                     extra=logging_info)
-
-                while series_title in CURRENTLY_PENDING_DB_SEARCH:
-                    time.sleep(1)
-
-                LOG.info(f'"{series_title}" has been processed as a searched series and will now be unlocked for '
-                     f'processing.', extra=logging_info)
-            else:
-                LOG.info(f'"{series_title}" has not been processed as a searched series nor is it currently pending '
-                     f'a database search. Locking series from being processing until database has been searched...',
-                     extra=logging_info)
-                CURRENTLY_PENDING_DB_SEARCH.add(series_title)
-
-        LOG.info(f'Checking for current and previously processed files with filename "{new_filename}"...',
-			 extra=logging_info)
-
         if AppSettings.mode_settings is None or AppSettings.mode_settings['rename_file']:
             try:
             # Multithreading Optimization
@@ -347,13 +323,13 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
                 CURRENTLY_PENDING_RENAME.remove(new_file_path)
                 return
 
-        if series_title in ProcSeriesTable.processed_series:
-            LOG.info(f'Found an entry in manga_metadata for "{series_title}".', extra=logging_info)
+        if manga_title in ProcSeriesTable.processed_series:
+            LOG.info(f'Found an entry in manga_metadata for "{manga_title}".', extra=logging_info)
         else:
-            LOG.info(f'Found an entry in manga_metadata for "{series_title}"; unlocking series for processing.',
+            LOG.info(f'Found an entry in manga_metadata for "{manga_title}"; unlocking series for processing.',
                      extra=logging_info)
-            ProcSeriesTable.processed_series.add(series_title)
-            CURRENTLY_PENDING_DB_SEARCH.remove(series_title)
+            ProcSeriesTable.processed_series.add(manga_title)
+#            CURRENTLY_PENDING_DB_SEARCH.remove(manga_title)
 
         if AppSettings.image_dir is not None and not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
             LOG.info(f'Image directory configured but cover not found. Send request to Anilist for necessary data.', extra=logging_info)
@@ -445,27 +421,6 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
         new_file_path = Path(manga_library_dir, new_filename)
         LOG.debug(f'new_file_path: {new_file_path}')
 
-        # More Multithreading Optimization
-        if series_title in ProcSeriesTable.processed_series:
-            LOG.info(f'"{series_title}" has been processed as a searched series and will continue processing.',
-                 extra=logging_info)
-        else:
-            if series_title in CURRENTLY_PENDING_DB_SEARCH:
-                LOG.info(f'"{series_title}" has not been processed as a searched series but is currently pending '
-                     f'a database search. Suspending further processing until database search has finished...',
-                     extra=logging_info)
-
-                while series_title in CURRENTLY_PENDING_DB_SEARCH:
-                    time.sleep(1)
-
-                LOG.info(f'"{series_title}" has been processed as a searched series and will now be unlocked for '
-                     f'processing.', extra=logging_info)
-            else:
-                LOG.info(f'"{series_title}" has not been processed as a searched series nor is it currently pending '
-                     f'a database search. Locking series from being processing until database has been searched...',
-                     extra=logging_info)
-                CURRENTLY_PENDING_DB_SEARCH.add(series_title)
-
         LOG.info(f'Checking for current and previously processed files with filename "{new_filename}"...',
 			 extra=logging_info)
 
@@ -497,14 +452,17 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
         manga_metadata = Metadata(series_title, logging_info, jikan_details, anilist_details)
         logging_info['metadata'] = manga_metadata.__dict__
 
-        if AppSettings.mode_settings is None or ('database_insert' in AppSettings.mode_settings.keys()
+        if series_title in ProcSeriesTable.processed_series:
+            LOG.info(f'Found an entry in manga_metadata for "{series_title}". Filename was probably not perfectly named according to MAL. Not adding metadata to MetadataTable.', extra=logging_info)
+        else:
+            if AppSettings.mode_settings is None or ('database_insert' in AppSettings.mode_settings.keys()
                                                  and AppSettings.mode_settings['database_insert']):
-            MetadataTable.insert(manga_metadata, logging_info)
-
-        LOG.info(f'Retrieved metadata for "{series_title}" from the Anilist and MyAnimeList APIs; '
+                MetadataTable.insert(manga_metadata, logging_info)            
+            LOG.info(f'Retrieved metadata for "{series_title}" from the Anilist and MyAnimeList APIs; '
                  f'now unlocking series for processing!', extra=logging_info)
-        ProcSeriesTable.processed_series.add(series_title)
-        CURRENTLY_PENDING_DB_SEARCH.remove(series_title)
+            ProcSeriesTable.processed_series.add(series_title)
+#        if manga_title in CURRENTLY_PENDING_DB_SEARCH:
+#            CURRENTLY_PENDING_DB_SEARCH.remove(manga_title)
 
     if AppSettings.mode_settings is None or ('write_comicinfo' in AppSettings.mode_settings.keys()
                                              and AppSettings.mode_settings['write_comicinfo']):
