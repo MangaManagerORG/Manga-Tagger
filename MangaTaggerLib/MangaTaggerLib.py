@@ -63,27 +63,6 @@ def process_manga_chapter(file_path: Path, event_id):
 
     manga_details = file_renamer(filename, logging_info)
 
-    # More Multithreading Optimization
-    if directory_name in ProcSeriesTable.processed_series:
-        LOG.info(f'"{directory_name}" has been processed as a searched series and will continue processing.',
-                 extra=logging_info)
-    else:
-        if directory_name in CURRENTLY_PENDING_DB_SEARCH:
-            LOG.info(f'"{directory_name}" has not been processed as a searched series but is currently pending '
-                     f'a database search. Suspending further processing until database search has finished...',
-                     extra=logging_info)
-
-            while directory_name in CURRENTLY_PENDING_DB_SEARCH:
-                time.sleep(1)
-
-            LOG.info(f'"{directory_name}" has been processed as a searched series and will now be unlocked for '
-                     f'processing.', extra=logging_info)
-        else:
-            LOG.info(f'"{directory_name}" has not been processed as a searched series nor is it currently pending '
-                     f'a database search. Locking series from being processing until database has been searched...',
-                     extra=logging_info)
-            CURRENTLY_PENDING_DB_SEARCH.add(directory_name)
-
     metadata_tagger(file_path, directory_name, manga_details[1], logging_info)
 
 def file_renamer(filename, logging_info):
@@ -325,6 +304,27 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
             return None
         new_file_path = Path(manga_library_dir, new_filename)
 
+        # More Multithreading Optimization
+        if series_title in ProcSeriesTable.processed_series:
+            LOG.info(f'"{series_title}" has been processed as a searched series and will continue processing.',
+                     extra=logging_info)
+        else:
+            if series_title in CURRENTLY_PENDING_DB_SEARCH:
+                LOG.info(f'"{series_title}" has not been processed as a searched series but is currently pending '
+                     f'a database search. Suspending further processing until database search has finished...',
+                     extra=logging_info)
+
+                while series_title in CURRENTLY_PENDING_DB_SEARCH:
+                    time.sleep(1)
+
+                LOG.info(f'"{series_title}" has been processed as a searched series and will now be unlocked for '
+                     f'processing.', extra=logging_info)
+            else:
+                LOG.info(f'"{series_title}" has not been processed as a searched series nor is it currently pending '
+                     f'a database search. Locking series from being processing until database has been searched...',
+                     extra=logging_info)
+                CURRENTLY_PENDING_DB_SEARCH.add(series_title)
+
         LOG.info(f'Checking for current and previously processed files with filename "{new_filename}"...',
 			 extra=logging_info)
 
@@ -352,10 +352,10 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
                 CURRENTLY_PENDING_RENAME.remove(new_file_path)
                 return
 
-        if manga_title in ProcSeriesTable.processed_series:
-            LOG.info(f'Found an entry in manga_metadata for "{manga_title}".', extra=logging_info)
+        if series_title in ProcSeriesTable.processed_series:
+            LOG.info(f'Found an entry in manga_metadata for "{series_title}".', extra=logging_info)
         else:
-            LOG.info(f'Found an entry in manga_metadata for "{manga_title}"; unlocking series for processing.',
+            LOG.info(f'Found an entry in manga_metadata for "{series_title}"; unlocking series for processing.',
                      extra=logging_info)
             ProcSeriesTable.processed_series.add(series_title)
             CURRENTLY_PENDING_DB_SEARCH.remove(series_title)
@@ -452,6 +452,27 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
 
         new_file_path = Path(manga_library_dir, new_filename)
         LOG.debug(f'new_file_path: {new_file_path}')
+
+        # More Multithreading Optimization
+        if series_title in ProcSeriesTable.processed_series:
+            LOG.info(f'"{series_title}" has been processed as a searched series and will continue processing.',
+                 extra=logging_info)
+        else:
+            if series_title in CURRENTLY_PENDING_DB_SEARCH:
+                LOG.info(f'"{series_title}" has not been processed as a searched series but is currently pending '
+                     f'a database search. Suspending further processing until database search has finished...',
+                     extra=logging_info)
+
+                while series_title in CURRENTLY_PENDING_DB_SEARCH:
+                    time.sleep(1)
+
+                LOG.info(f'"{series_title}" has been processed as a searched series and will now be unlocked for '
+                     f'processing.', extra=logging_info)
+            else:
+                LOG.info(f'"{series_title}" has not been processed as a searched series nor is it currently pending '
+                     f'a database search. Locking series from being processing until database has been searched...',
+                     extra=logging_info)
+                CURRENTLY_PENDING_DB_SEARCH.add(series_title)
 
         LOG.info(f'Checking for current and previously processed files with filename "{new_filename}"...',
 			 extra=logging_info)
