@@ -102,20 +102,10 @@ def filename_parser(filename, logging_info):
         chapter_title = re.sub('\D+$', '', chapter_title)
         # Removed space and any character that are not number. Usually that's the name of the chapter.
 
-        # Match "V05-Chapter" "S005-Chapter15" "V05-GAME005" "V056CHap560" "S200#250" without the chapter number, we removed spaces above
-        volume_chapter_title_pattern = "\D+\d*[.,]?\d*\D+"
+	# Match "Chapter5" "GAME005" "Page/005" "ACT-50" "#505" "V05.5CHAP5.5" without the chapter number, we removed spaces above
+        chapter_title_pattern = "[^\d\.]\D*\d*[.,]?\d*[^\d\.]\D*"
 
-	    # Match "Chapter5" "GAME005" "Page/005" "ACT-50" "#505" without the chapter number, we removed spaces above
-        chapter_title_pattern = "\D+"
-
-        if re.match(volume_chapter_title_pattern, chapter_title):
-             p = re.compile(volume_chapter_title_pattern)
-             prog = p.match(chapter_title)
-             chapter_title_name = prog.group(0)
-             delimiter = chapter_title_name
-             delimiter_index = len(chapter_title_name)
-
-        elif re.match(chapter_title_pattern, chapter_title):
+        if re.match(chapter_title_pattern, chapter_title):
              p = re.compile(chapter_title_pattern)
              prog = p.match(chapter_title)
              chapter_title_name = prog.group(0)
