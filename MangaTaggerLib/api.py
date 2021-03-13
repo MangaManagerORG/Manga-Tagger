@@ -4,68 +4,6 @@ import time
 from datetime import datetime
 from typing import Optional, Dict, Mapping, Union, Any
 
-from jikanpy import Jikan
-
-
-class MTJikan(Jikan):
-    def __init__(
-            self,
-            selected_base: Optional[str] = None,
-            session: Optional[requests.Session] = None,
-    ) -> None:
-        super(MTJikan, self).__init__(selected_base, session)
-        self.calls_second = 0
-        self.calls_minute = 0
-        self.last_api_call = datetime.now()
-
-    # Rate Limit: 2 requests/second
-    def _check_rate_seconds(self):
-        last_api_call_delta = (datetime.now() - self.last_api_call).total_seconds()
-
-        if self.calls_second > 2 and last_api_call_delta < 1:
-            time.sleep(1)
-        elif last_api_call_delta > 1:
-            self.calls_second = 0
-
-    # Rate Limit: 30 requests/minute
-    def _check_rate_minutes(self):
-        last_api_call_delta = (datetime.now() - self.last_api_call).total_seconds()
-
-        if self.calls_minute > 30 and last_api_call_delta < 60:
-            time.sleep(61 - last_api_call_delta)
-        elif last_api_call_delta > 60:
-            self.calls_minute = 0
-
-    def search(
-            self,
-            search_type: str,
-            query: str,
-            page: Optional[int] = None,
-            parameters: Optional[Mapping[str, Optional[Union[int, str, float]]]] = None,
-    ) -> Dict[str, Any]:
-        self._check_rate_seconds()
-        self._check_rate_minutes()
-
-        self.calls_second += 1
-        self.calls_minute += 1
-        self.last_api_call = datetime.now()
-        search_results = super(MTJikan, self).search(search_type, query, page, parameters)
-        self.session.close()
-        return search_results
-
-    def manga(
-            self, id: int, extension: Optional[str] = None, page: Optional[int] = None
-    ) -> Dict[str, Any]:
-        self._check_rate_seconds()
-        self._check_rate_minutes()
-
-        self.calls_second += 1
-        self.calls_minute += 1
-        self.last_api_call = datetime.now()
-        search_results = super(MTJikan, self).manga(id, extension, page)
-        self.session.close()
-        return search_results
-
 class AniList:
     _log = None
 
@@ -90,11 +28,46 @@ class AniList:
         return response.json()['data']['Media']
 
     @classmethod
-    def search_staff_by_mal_id(cls, mal_id, logging_info):
+    def search_for_manga_title_by_manga_title(cls, manga_title, format, logging_info):
         query = '''
-        query search_staff_by_mal_id ($mal_id: Int) {
-          Media (idMal: $mal_id, type: MANGA) {
+        query search_manga_by_manga_title ($manga_title: String, $format: MediaFormat) {
+          Media (search: $manga_title, type: MANGA, format: $format, isAdult: false) {
+            title {
+              romaji
+              english
+              native
+            }
+          }
+        }
+        '''
+
+        variables = {
+            'manga_title': manga_title,
+            'format': format
+        }
+
+        return cls._post(query, variables, logging_info)
+        
+    @classmethod
+    def search_details_by_series_title(cls, series_title, format, logging_info):
+        query = '''
+        query search_details_by_series_title ($series_title: String, $format: MediaFormat) {
+          Media (search: $series_title, type: MANGA, format: $format) {
+            id
+            status
             siteUrl
+            title {
+              romaji
+              english
+              native
+            }
+            type
+            genres
+            startDate {
+              day
+              month
+              year
+            }
             coverImage {
               extraLarge
             }
@@ -112,32 +85,14 @@ class AniList:
                 role
               }
             }
+            description
           }
         }
         '''
 
         variables = {
-            'mal_id': mal_id
+            'series_title': series_title,
+            'format': format
         }
-
-        return cls._post(query, variables, logging_info)
-
-    @classmethod
-    def search_for_manga_title_by_mal_id(cls, mal_id, logging_info):
-        query = '''
-        query search_manga_by_mal_id ($mal_id: Int) {
-          Media (idMal: $mal_id, type: MANGA) {
-            title {
-              romaji
-              english
-              native
-            }
-          }
-        }
-        '''
-
-        variables = {
-            'mal_id': mal_id
-        }
-
+        
         return cls._post(query, variables, logging_info)

@@ -2,6 +2,8 @@ import logging
 import time
 import re
 import requests
+import unicodedata
+
 from datetime import datetime
 from os import path
 from pathlib import Path
@@ -11,10 +13,8 @@ from xml.etree.ElementTree import SubElement, Element, Comment, tostring
 from xml.dom.minidom import parseString
 from zipfile import ZipFile
 
-from jikanpy.exceptions import APIException
-
 from MangaTaggerLib._version import __version__
-from MangaTaggerLib.api import MTJikan, AniList
+from MangaTaggerLib.api import AniList
 from MangaTaggerLib.database import MetadataTable, ProcFilesTable, ProcSeriesTable
 from MangaTaggerLib.errors import FileAlreadyProcessedError, FileUpdateNotRequiredError, UnparsableFilenameError, \
     MangaNotFoundError, MangaMatchedException
@@ -25,7 +25,6 @@ from MangaTaggerLib.utils import AppSettings, compare
 # Global Variable Declaration
 LOG = logging.getLogger('MangaTaggerLib.MangaTaggerLib')
 
-CURRENTLY_PENDING_DB_SEARCH = set()
 CURRENTLY_PENDING_RENAME = set()
 
 
@@ -63,7 +62,7 @@ def process_manga_chapter(file_path: Path, event_id):
 
     manga_details = filename_parser(filename, logging_info)
 
-    metadata_tagger(file_path, directory_name, manga_details, logging_info)
+    metadata_tagger(file_path, directory_name, manga_details[0], manga_details[1], logging_info)
 
 def filename_parser(filename, logging_info):
     LOG.info(f'Attempting to rename "{filename}"...', extra=logging_info)
@@ -84,15 +83,19 @@ def filename_parser(filename, logging_info):
     LOG.debug(f'manga_title: {manga_title}')
     LOG.debug(f'chapter: {chapter_title}')
 
+    format = "MANGA"
+
     # If "chapter" is in the chapter substring
     try:
         if manga_title.lower() in chapter_title:
             if compare(manga_title, chapter_title) > .5 and compare(manga_title, chapter_title[:len(manga_title)]) > .8:
                 raise MangaMatchedException()
 
-        if 'oneshot' in path.splitext(filename[1].lower())[0]:
-            LOG.debug(f'manga_type: oneshot')
-            return f'{manga_title} {path.splitext(filename[1])[0]}.cbz', 'oneshot'
+        if not hasNumbers(chapter_title):
+             if "oneshot" in chapter_title.lower():
+                 format = "ONE_SHOT"
+             chapter_title = "chap000"
+             
 
         chapter_title = chapter_title.replace(' ', '')
         chapter_title = re.sub('\D+$', '', chapter_title)
@@ -101,7 +104,7 @@ def filename_parser(filename, logging_info):
         # Match "V05-Chapter" "S005-Chapter15" "V05-GAME005" "V056CHap560" "S200#250" without the chapter number, we removed spaces above
         volume_chapter_title_pattern = "\D+\d*[.,]?\d*\D+"
 
-	# Match "Chapter5" "GAME005" "Page/005" "ACT-50" "#505" without the chapter number, we removed spaces above
+	    # Match "Chapter5" "GAME005" "Page/005" "ACT-50" "#505" without the chapter number, we removed spaces above
         chapter_title_pattern = "\D+"
 
         if re.match(volume_chapter_title_pattern, chapter_title):
@@ -161,7 +164,7 @@ def filename_parser(filename, logging_info):
 
     logging_info['chapter_number'] = chapter_number
 
-    return chapter_number
+    return chapter_number, format
 
 
 def rename_action(current_file_path: Path, new_file_path: Path, manga_title, chapter_number, logging_info):
@@ -253,7 +256,7 @@ def compare_versions(old_filename: str, new_filename: str):
         return False
 
 
-def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
+def metadata_tagger(file_path, manga_title, manga_chapter_number, format, logging_info):
     manga_search = None
     db_exists = True
     retries = 0
@@ -273,26 +276,29 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
             manga_search = MetadataTable.search_by_series_title_eng(manga_title)
             retries = 3
         else:  # The manga is not in the database, so ping the API and create the database
-            LOG.info('Manga was not found in the database; resorting to Jikan API.', extra=logging_info)
+            LOG.info('Manga was not found in the database; resorting to Anilist API.', extra=logging_info)
 
             try:
-                manga_search = MTJikan().search('manga', manga_title)
+                manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
             except (APIException, ConnectionError) as e:
                 LOG.warning(e, extra=logging_info)
-                LOG.warning('Manga Tagger has unintentionally breached the API limits on Jikan. Waiting 60s to clear '
+                LOG.warning('Manga Tagger has unintentionally breached the API limits on Anilist. Waiting 60s to clear '
                             'all rate limiting limits...')
                 time.sleep(60)
-                manga_search = MTJikan().search('manga', manga_title)
+                manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
+            if manga_search is None:
+                raise MangaNotFoundError(manga_title)
             db_exists = False
 
     if db_exists:
-        series_title = MetadataTable.search_series_title_by_search_value(manga_title)
-        manga_library_dir = Path(AppSettings.library_dir, series_title)
+        series_title = MetadataTable.search_series_title(manga_title)
+        series_title_legal = slugify(series_title)
+        manga_library_dir = Path(AppSettings.library_dir, series_title_legal)
         if not manga_library_dir.exists():
             LOG.info(f'A directory for "{series_title}" in "{AppSettings.library_dir}" does not exist; creating now.')
             manga_library_dir.mkdir()
         try:
-            new_filename = f"{series_title} {manga_chapter_number}.cbz"
+            new_filename = f"{series_title_legal} {manga_chapter_number}.cbz"
             LOG.debug(f'new_filename: {new_filename}')
         except TypeError:
             LOG.warning(f'Manga Tagger was unable to process "{file_path}"', extra=logging_info)
@@ -329,7 +335,6 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
             LOG.info(f'Found an entry in manga_metadata for "{manga_title}"; unlocking series for processing.',
                      extra=logging_info)
             ProcSeriesTable.processed_series.add(manga_title)
-#            CURRENTLY_PENDING_DB_SEARCH.remove(manga_title)
 
         if AppSettings.image_dir is not None and not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
             LOG.info(f'Image directory configured but cover not found. Send request to Anilist for necessary data.', extra=logging_info)
@@ -339,79 +344,28 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
         manga_metadata = Metadata(series_title, logging_info, details=manga_search)
         logging_info['metadata'] = manga_metadata.__dict__
     else:
-        manga_found = False
-        try:
-            for result in manga_search['results']:
-                if result['type'].lower() == 'manga' or result['type'].lower() == 'manhwa' or result['type'].lower() == 'manhua':
-                    manga_id = result['mal_id']
-                    anilist_titles = construct_anilist_titles(
-                        AniList.search_for_manga_title_by_mal_id(manga_id, logging_info)['title'])
-                    logging_info['anilist_titles'] = anilist_titles
+    
+        anilist_titles = construct_anilist_titles(manga_search['title'])
+        logging_info['anilist_titles'] = anilist_titles
+        
+        if not anilist_titles == 'None' or anilist_titles is not None:
+            manga_found = True
+            
+        series_title = anilist_titles.get('romaji')
+        series_title_legal = slugify(series_title)
+        LOG.info(f'Manga title found for "{manga_title}" found as "{series_title}".', extra=logging_info)
 
-                    try:
-                        jikan_details = MTJikan().manga(manga_id)
-                    except (APIException, ConnectionError) as e:
-                        LOG.warning(e, extra=logging_info)
-                        LOG.warning(
-                            'Manga Tagger has unintentionally breached the API limits on Jikan. Waiting 60s to clear '
-                            'all rate limiting limits...')
-                        time.sleep(60)
-                        jikan_details = MTJikan().manga(manga_id)
-
-                    jikan_titles = construct_jikan_titles(jikan_details)
-                    logging_info['jikan_titles'] = jikan_titles
-
-                    LOG.info(f'Comparing titles found for "{manga_title}"...', extra=logging_info)
-                    comparison_values = compare_titles(manga_title, jikan_titles, anilist_titles, logging_info)
-
-                    if AppSettings.disable_ani_compare:
-                        LOG.info(f'ani_compare disabled, MAL search result will not be compared against Anilist for {manga_title}', extra=logging_info)
-                        manga_found = True
-                        break
-                    elif comparison_values is None:
-                        continue
-                    elif any(value > .8 for value in comparison_values):
-                        LOG.info(f'Match found for {manga_title}', extra=logging_info)
-                        manga_found = True
-                        break
-                    elif any(value > .5 for value in comparison_values):
-                        jikan_details = MTJikan().manga(result['mal_id'])
-                        jikan_authors = jikan_details['authors']
-                        anilist_authors = AniList.search_staff_by_mal_id(result['mal_id'],
-                                                                         logging_info)['staff']['edges']
-
-                        logging_info['jikan_authors'] = jikan_authors
-                        logging_info['anilist_authors'] = anilist_authors
-
-                        LOG.info(f'Match found for {manga_title} with 50% likelihood; now checking '
-                                 f'authors for further veritifcation', extra=logging_info)
-
-                        if compare_authors(jikan_authors, anilist_authors, logging_info):
-                            LOG.info(f'Authors matched up for {manga_title}; proceeding with processing')
-                            manga_found = True
-                            break
-            if not manga_found:
-                raise MangaNotFoundError(manga_title)
-        except MangaNotFoundError as mnfe:
-            LOG.exception(mnfe, extra=logging_info)
-            return
-
-        LOG.info(f'ID for "{manga_title}" found as "{manga_id}".', extra=logging_info)
-
-        anilist_details = AniList.search_staff_by_mal_id(manga_id, logging_info)
-        LOG.debug(f'jikan_details: {jikan_details}')
+        anilist_details = AniList.search_details_by_series_title(series_title, format, logging_info)
         LOG.debug(f'anilist_details: {anilist_details}')
 
-        series_title = jikan_titles.get('title')
-
         try:
-            new_filename = f"{series_title} {manga_chapter_number}.cbz"
+            new_filename = f"{series_title_legal} {manga_chapter_number}.cbz"
             LOG.debug(f'new_filename: {new_filename}')
         except TypeError:
             LOG.warning(f'Manga Tagger was unable to process "{file_path}"', extra=logging_info)
             return None
 
-        manga_library_dir = Path(AppSettings.library_dir, series_title)
+        manga_library_dir = Path(AppSettings.library_dir, series_title_legal)
         LOG.debug(f'Manga Library Directory: {manga_library_dir}')
 
         if not manga_library_dir.exists():
@@ -449,7 +403,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
                 CURRENTLY_PENDING_RENAME.remove(new_file_path)
                 return
 
-        manga_metadata = Metadata(series_title, logging_info, jikan_details, anilist_details)
+        manga_metadata = Metadata(series_title, logging_info, anilist_details)
         logging_info['metadata'] = manga_metadata.__dict__
 
         if series_title in ProcSeriesTable.processed_series:
@@ -461,8 +415,6 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
             LOG.info(f'Retrieved metadata for "{series_title}" from the Anilist and MyAnimeList APIs; '
                  f'now unlocking series for processing!', extra=logging_info)
             ProcSeriesTable.processed_series.add(series_title)
-#        if manga_title in CURRENTLY_PENDING_DB_SEARCH:
-#            CURRENTLY_PENDING_DB_SEARCH.remove(manga_title)
 
     if AppSettings.mode_settings is None or ('write_comicinfo' in AppSettings.mode_settings.keys()
                                              and AppSettings.mode_settings['write_comicinfo']):
@@ -482,27 +434,6 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, logging_info):
     LOG.info(f'Processing on "{new_file_path}" has finished.', extra=logging_info)
     return manga_metadata
 
-
-def construct_jikan_titles(jikan_details):
-    jikan_titles = {
-        'title': jikan_details['title']
-    }
-
-    if jikan_details['title_english'] is not None:
-        jikan_titles['title_english'] = jikan_details['title_english']
-
-    if jikan_details['title_japanese'] is not None:
-        jikan_titles['title_japanese'] = jikan_details['title_japanese']
-
-    if not jikan_details['title_synonyms']:
-        i = 1
-        for title in jikan_details['title_synonyms']:
-            jikan_titles[f'title_{i}'] = title
-            i += 1
-
-    return jikan_titles
-
-
 def construct_anilist_titles(anilist_details):
     anilist_titles = {}
 
@@ -516,48 +447,6 @@ def construct_anilist_titles(anilist_details):
         anilist_titles['native'] = anilist_details['native']
 
     return anilist_titles
-
-
-def compare_titles(manga_title: str, jikan_titles: dict, anilist_titles: dict, logging_info):
-    comparison_values = []
-
-    for jikan_key in jikan_titles.keys():
-        comparison_values.append(compare(manga_title, jikan_titles[jikan_key]))
-
-    for anilist_key in anilist_titles.keys():
-        comparison_values.append(compare(manga_title, anilist_titles[anilist_key]))
-
-    logging_info['pre_comparison_values'] = comparison_values
-    LOG.debug(f'pre_comparison_values: {comparison_values}', extra=logging_info)
-
-    if not any(value > .69 for value in comparison_values):
-        return None
-
-    comparison_values = []
-
-    for jikan_key in jikan_titles.keys():
-        for anilist_key in anilist_titles.keys():
-            comparison_values.append(compare(jikan_titles[jikan_key], anilist_titles[anilist_key]))
-
-    logging_info['post_comparison_values'] = comparison_values
-    LOG.debug(f'post_comparison_values: {comparison_values}', extra=logging_info)
-
-    return comparison_values
-
-
-def compare_authors(jikan_authors, anilist_authors, logging_info):
-    for author_1 in jikan_authors:
-        if ',' in author_1['name']:
-            full_name_split = author_1['name'].split(', ')
-            author_1_name = f'{full_name_split[1]} {full_name_split[0]}'
-        else:
-            author_1_name = author_1['name']
-
-        for author_2 in anilist_authors:
-            if author_1_name == author_2['node']['name']['full']:
-                return True
-    return False
-
 
 def construct_comicinfo_xml(metadata, chapter_number, logging_info):
     LOG.info(f'Constructing comicinfo object for "{metadata.series_title}", chapter {chapter_number}...',
@@ -606,8 +495,8 @@ def construct_comicinfo_xml(metadata, chapter_number, logging_info):
     cover_artist = SubElement(comicinfo, 'CoverArtist')
     cover_artist.text = next(iter(metadata.staff['art']))
 
-    publisher = SubElement(comicinfo, 'Publisher')
-    publisher.text = next(iter(metadata.serializations))
+#    publisher = SubElement(comicinfo, 'Publisher')
+#    publisher.text = next(iter(metadata.serializations))
 
     genre = SubElement(comicinfo, 'Genre')
     for mg in metadata.genres:
@@ -616,8 +505,8 @@ def construct_comicinfo_xml(metadata, chapter_number, logging_info):
         else:
             genre.text = f'{mg}'
 
-    web = SubElement(comicinfo, 'Web')
-    web.text = metadata.mal_url
+#    web = SubElement(comicinfo, 'Web')
+#    web.text = metadata.mal_url
 
     language = SubElement(comicinfo, 'LanguageISO')
     language.text = 'en'
@@ -626,7 +515,7 @@ def construct_comicinfo_xml(metadata, chapter_number, logging_info):
     manga.text = 'Yes'
 
     notes = SubElement(comicinfo, 'Notes')
-    notes.text = f'Scraped metadata from AniList and MyAnimeList (using Jikan API) on {metadata.scrape_date}'
+    notes.text = f'Scraped metadata from AniList on {metadata.scrape_date}'
 
     comicinfo.set('xmlns:xsd', 'http://www.w3.org/2001/XMLSchema')
     comicinfo.set('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
@@ -654,3 +543,22 @@ def download_cover_image(manga_title, image_url):
     image = requests.get(image_url)
     with open(f'{AppSettings.image_dir}/{manga_title}_cover.jpg', 'wb') as image_file:
         image_file.write(image.content)
+        
+def slugify(value, allow_unicode=False):
+    """
+    Taken from https://github.com/django/django/blob/master/django/utils/text.py
+    Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
+    dashes to single dashes. Remove characters that aren't alphanumerics,
+    underscores, or hyphens. Convert to lowercase. Also strip leading and
+    trailing whitespace, dashes, and underscores.
+    """
+    value = str(value)
+    if allow_unicode:
+        value = unicodedata.normalize('NFKC', value)
+    else:
+        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^\w\s-]', '', value)
+    return value
+    
+def hasNumbers(inputString):
+    return bool(re.search(r'\d', inputString))

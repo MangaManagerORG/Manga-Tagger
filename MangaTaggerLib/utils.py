@@ -21,7 +21,6 @@ class AppSettings:
     timezone = None
     version = None
 
-    disable_ani_compare = False
     image_dir = None
     library_dir = None
     is_network_path = None
@@ -128,11 +127,6 @@ class AppSettings:
             cls._log.critical('Manga Tagger cannot function without a library directory for moving processed '
                               'files into. Configure one in the "settings.json" and try again.')
             sys.exit(1)
-
-        # Anilist comparison settings Configuration
-        if settings['application']['disable_ani_compare']:
-            cls.disable_ani_compare = True
-            cls._log.info(f'Anilist title comparison disabled')
 
         # Load necessary database tables
         Database.load_database_tables()
@@ -241,7 +235,6 @@ class AppSettings:
                 "debug_mode": False,
                 "timezone": "America/New_York",
                 "image_dir": "/manga",
-                "disable_ani_compare": False,
                 "library": {
                     "dir": "/manga/library",
                     "is_network_path": False,
