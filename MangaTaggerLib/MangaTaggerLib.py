@@ -12,6 +12,7 @@ from requests.exceptions import ConnectionError
 from xml.etree.ElementTree import SubElement, Element, Comment, tostring
 from xml.dom.minidom import parseString
 from zipfile import ZipFile
+from bs4 import BeautifulSoup
 
 from MangaTaggerLib._version import __version__
 from MangaTaggerLib.api import AniList
@@ -468,7 +469,8 @@ def construct_comicinfo_xml(metadata, chapter_number, logging_info):
     number.text = f'{chapter_number}'
 
     summary = SubElement(comicinfo, 'Summary')
-    summary.text = metadata.description
+    soup = BeautifulSoup(metadata.description)
+    summary.text = soup.get_text()
 
     publish_date = datetime.strptime(metadata.publish_date, '%Y-%m-%d').date()
     year = SubElement(comicinfo, 'Year')
