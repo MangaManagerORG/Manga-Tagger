@@ -103,8 +103,10 @@ def filename_parser(filename, logging_info):
             chapter_title = "chap000." + chapter_title
 		 
         chapter_title = chapter_title.replace(' ', '')
+        chapter_title = re.sub('\(\d*\)$', '', chapter_title)
+        # Remove (1) (2) .. because it's often redundant and mess with parsing
         chapter_title = re.sub('\D*$', '', chapter_title)
-        # Removed space and any character that are not number. Usually that's the name of the chapter.
+        # Removed space and any character at the end of the chapter_title that are not number. Usually that's the name of the chapter.
 
 	# Match "Chapter5" "GAME005" "Page/005" "ACT-50" "#505" "V05.5CHAP5.5" without the chapter number, we removed spaces above
         chapter_title_pattern = "[^\d\.]\D*\d*[.,]?\d*[^\d\.]\D*"
