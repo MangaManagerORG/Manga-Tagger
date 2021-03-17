@@ -1,15 +1,13 @@
 """Exceptions raised by Manga Tagger"""
 
-
 class MangaNotFoundError(Exception):
     """
     Exception raised when the manga cannot be found in the results from MyAnimeList (Jikan).
     """
     def __init__(self, manga_title):
-        super().__init__(f'"{manga_title}" was not found in the returned results from MyAnimeList (using Jikan API.) '
+        super().__init__(f'"{manga_title}" was not found in the returned results from Anilist '
                          f'This may be due to a difference in manga series titles, or may be something else entirely. '
                          f'Please open an issue for investigation.')
-
 
 class MetadataNotCompleteError(Exception):
     """
