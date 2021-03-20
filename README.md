@@ -44,6 +44,9 @@ services:
       - MANGA_TAGGER_LOGGING_CONSOLE=enabled
       - MANGA_TAGGER_LOGGING_FILE=enabled
       - MANGA_TAGGER_LOGGING_JSON=disabled
+      - MANGA_TAGGER_LOGGING_TCP=enabled
+      - MANGA_TAGGER_LOGGING_JSONTCP=enabled
+
     volumes:
       - /path/to/config:/config
       - /path/to/library:/manga # directory manga-tagger move tagged files to
