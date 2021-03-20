@@ -8,6 +8,7 @@ fi
 chown abc:abc /app/Manga-Tagger -R
 chown abc:abc /manga -R
 chown abc:abc /downloads -R
+cd /app/Manga-Tagger
 
 exec \
 	s6-setuidgid abc python3 /app/Manga-Tagger/MangaTagger.py
