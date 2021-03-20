@@ -210,11 +210,11 @@ class AppSettings:
         # Check TCP and JSON TCP for port conflicts before creating the handlers
         if settings['tcp']['enabled']:
             tcp_logging = True
-        else
+        else:
             tcp_logging = False
         if settings['json_tcp']['enabled']:
             json_tcp_loggin = True
-        else
+        else:
             json_tcp_loggin = False
 
         if os.getenv("MANGA_TAGGER_LOGGING_TCP") is not None and os.getenv("MANGA_TAGGER_LOGGING_TCP").lower() == 'enabled':
