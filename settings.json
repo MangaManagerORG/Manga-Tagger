@@ -2,7 +2,7 @@
 	"application": {
 		"debug_mode": false,
 		"timezone": "America/New_York",
-                "image_dir": "config/cover",
+                "image_dir": "/config/cover",
 		"library": {
 			"dir": "/manga",
 			"is_network_path": false,
