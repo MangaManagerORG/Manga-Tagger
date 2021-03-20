@@ -3,6 +3,8 @@ import json
 import logging
 import subprocess
 import sys
+import os
+
 from logging.handlers import RotatingFileHandler, SocketHandler
 from pathlib import Path
 from tkinter import filedialog, messagebox, Tk
@@ -54,6 +56,21 @@ class AppSettings:
         Database.auth_source = settings['database']['auth_source']
         Database.server_selection_timeout_ms = settings['database']['server_selection_timeout_ms']
 
+        if os.getenv("MANGA_TAGGER_DB_NAME") is not None:
+            Database.database_name = os.getenv("MANGA_TAGGER_DB_NAME")
+        if os.getenv("MANGA_TAGGER_DB_HOST_ADDRESS") is not None:
+            Database.host_address = os.getenv("MANGA_TAGGER_DB_HOST_ADDRESS")
+        if os.getenv("MANGA_TAGGER_DB_PORT") is not None:
+            Database.port = int(os.getenv("MANGA_TAGGER_DB_PORT"))
+        if os.getenv("MANGA_TAGGER_DB_USERNAME") is not None:
+            Database.username = os.getenv("MANGA_TAGGER_DB_USERNAME")
+        if os.getenv("MANGA_TAGGER_DB_PASSWORD") is not None:
+            Database.password = os.getenv("MANGA_TAGGER_DB_PASSWORD")
+        if os.getenv("MANGA_TAGGER_DB_AUTH_SOURCE") is not None:
+            Database.auth_source = os.getenv("MANGA_TAGGER_DB_AUTH_SOURCE")
+        if os.getenv("MANGA_TAGGER_DB_SELECTION_TIMEOUT") is not None:
+            Database.server_selection_timeout_ms = int(os.getenv("MANGA_TAGGER_DB_SELECTION_TIMEOUT"))
+
         cls._log.debug('Database settings configured!')
         Database.initialize()
         Database.print_debug_settings()
@@ -73,6 +90,8 @@ class AppSettings:
 
         # Set Application Timezone
         cls.timezone = settings['application']['timezone']
+        if os.getenv('TZ') is not None:
+            cls.timezone = os.getenv("TZ")
         cls._log.debug(f'Timezone: {cls.timezone}')
 
         # Dry Run Mode Configuration
@@ -83,23 +102,31 @@ class AppSettings:
                                  'write_comicinfo': settings['application']['dry_run']['write_comicinfo']}
 
         # Multithreading Configuration
-        if settings['application']['multithreading']['threads'] <= 0:
+        if settings['application']['multithreading']['threads'] <= 0 and int(os.getenv("MANGA_TAGGER_THREADS")) is None or int(os.getenv("MANGA_TAGGER_THREADS")) is not None and int(os.getenv("MANGA_TAGGER_THREADS")) <= 0:
             QueueWorker.threads = 1
         else:
             QueueWorker.threads = settings['application']['multithreading']['threads']
+            if int(os.getenv("MANGA_TAGGER_THREADS")) is not None:
+                QueueWorker.threads = int(os.getenv("MANGA_TAGGER_THREADS"))
 
         cls._log.debug(f'Threads: {QueueWorker.threads}')
 
-        if settings['application']['multithreading']['max_queue_size'] < 0:
+        if settings['application']['multithreading']['max_queue_size'] < 0 and int(os.getenv("MANGA_TAGGER_MAX_QUEUE_SIZE")) is None or int(os.getenv("MANGA_TAGGER_MAX_QUEUE_SIZE")) is not None and int(os.getenv("MANGA_TAGGER_MAX_QUEUE_SIZE")) < 0:
             QueueWorker.max_queue_size = 0
         else:
             QueueWorker.max_queue_size = settings['application']['multithreading']['max_queue_size']
+            if int(os.getenv("MANGA_TAGGER_MAX_QUEUE_SIZE")) is not None:
+                QueueWorker.max_queue_size = int(os.getenv("MANGA_TAGGER_MAX_QUEUE_SIZE"))
 
         cls._log.debug(f'Max Queue Size: {QueueWorker.max_queue_size}')
 
         # Debug Mode - Prevent application from processing files
         if settings['application']['debug_mode']:
             QueueWorker._debug_mode = True
+        if os.getenv('MANGA_TAGGER_DEBUG') is True:
+            QueueWorker._debug_mode = True
+        elif os.getenv('MANGA_TAGGER_DEBUG') is False:
+            QueueWorker._debug_mode = False
 
         cls._log.debug(f'Debug Mode: {QueueWorker._debug_mode}')
 
