@@ -228,7 +228,6 @@ class AppSettings:
 
     @classmethod
     def _create_settings(cls):
-        Tk().withdraw()
 
         return {
             "application": {
