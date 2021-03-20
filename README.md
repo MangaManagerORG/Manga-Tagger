@@ -32,7 +32,7 @@ services:
       - TZ=Europe/Paris
       - UMASK=022 #optional
 
-      - MANGA_TAGGER_DEBUG_MODE=true
+      - MANGA_TAGGER_DEBUG_MODE=false
 
       - MANGA_TAGGER_DRY_RUN=false
       - MANGA_TAGGER_DB_INSERT=false
