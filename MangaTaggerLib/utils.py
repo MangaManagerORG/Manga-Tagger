@@ -102,19 +102,19 @@ class AppSettings:
                                  'write_comicinfo': settings['application']['dry_run']['write_comicinfo']}
 
             if os.getenv("MANGA_TAGGER_DB_INSERT") is not None and os.getenv("MANGA_TAGGER_DB_INSERT").lower() == 'true':
-                cls.mode_settings = {'database_insert': True}
+                cls.mode_settings['database_insert'] = True
             elif os.getenv("MANGA_TAGGER_DB_INSERT") is not None:
-                cls.mode_settings = {'database_insert': False}
+                cls.mode_settings['database_insert'] = False
 
             if os.getenv("MANGA_TAGGER_RENAME_FILE") is not None and os.getenv("MANGA_TAGGER_RENAME_FILE").lower() == 'true':
-                cls.mode_settings = {'rename_file': True}
+                cls.mode_settings['rename_file'] = True
             elif os.getenv("MANGA_TAGGER_RENAME_FILE") is not None:
-                cls.mode_settings = {'rename_file': False}
+                cls.mode_settings['rename_file'] = False
 
             if os.getenv("MANGA_TAGGER_WRITE_COMICINFO") is not None and os.getenv("MANGA_TAGGER_WRITE_COMICINFO").lower() == 'true':
-                cls.mode_settings = {'write_comicinfo': True}
+                cls.mode_settings['write_comicinfo'] = True
             elif os.getenv("MANGA_TAGGER_WRITE_COMICINFO") is not None:
-                cls.mode_settings = {'write_comicinfo': False}
+                cls.mode_settings['write_comicinfo'] = False
 
         # Multithreading Configuration
         if settings['application']['multithreading']['threads'] <= 0 and int(os.getenv("MANGA_TAGGER_THREADS")) is None or int(os.getenv("MANGA_TAGGER_THREADS")) is not None and int(os.getenv("MANGA_TAGGER_THREADS")) <= 0:
