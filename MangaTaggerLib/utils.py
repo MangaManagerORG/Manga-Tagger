@@ -208,7 +208,7 @@ class AppSettings:
             logger.addHandler(log_handler)
 
         # Check TCP and JSON TCP for port conflicts before creating the handlers
-        if settings['tcp']['enabled'] and settings['json_tcp']['enabled'] or os.getenv("MANGA_TAGGER_LOGGING_TCP").lower() == 'enabled' and os.getenv("MANGA_TAGGER_LOGGING_JSONTCP").lower() == 'enabled':
+        if settings['tcp']['enabled'] and settings['json_tcp']['enabled']:
             if settings['tcp']['port'] == settings['json_tcp']['port']:
                 logger.critical('TCP and JSON TCP logging are both enabled, but their port numbers are the same. '
                                 'Either change the port value or disable one of the handlers in settings.json '
@@ -216,13 +216,13 @@ class AppSettings:
                 sys.exit(1)
 
         # TCP Logging
-        if settings['tcp']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_TCP") is None or os.getenv("MANGA_TAGGER_LOGGING_TCP").lower() == 'enabled':
+        if settings['tcp']['enabled']:
             log_handler = SocketHandler(settings['tcp']['host'], settings['tcp']['port'])
             log_handler.setFormatter(logging.Formatter(settings['tcp']['log_format']))
             logger.addHandler(log_handler)
 
         # JSON TCP Logging
-        if settings['json_tcp']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_JSONTCP") is None or os.getenv("MANGA_TAGGER_LOGGING_JSONTCP").lower() == 'enabled':
+        if settings['json_tcp']['enabled']:
             log_handler = SocketHandler(settings['json_tcp']['host'], settings['json_tcp']['port'])
             log_handler.setFormatter(jsonlogger.JsonFormatter(settings['json_tcp']['log_format']))
             logger.addHandler(log_handler)
