@@ -213,9 +213,9 @@ class AppSettings:
         else:
             tcp_logging = False
         if settings['json_tcp']['enabled']:
-            json_tcp_loggin = True
+            json_tcp_logging = True
         else:
-            json_tcp_loggin = False
+            json_tcp_logging = False
 
         if os.getenv("MANGA_TAGGER_LOGGING_TCP") is not None and os.getenv("MANGA_TAGGER_LOGGING_TCP").lower() == 'enabled':
             tcp_logging = True
