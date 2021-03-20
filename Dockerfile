@@ -1,11 +1,9 @@
 FROM ghcr.io/linuxserver/baseimage-alpine:3.13
-
 ENV TZ="Etc/UTC"
 
+### Upgrade
 RUN \
-  apk update && \
-  echo "Install required tools" && \
-  apk add --no-cache sudo git
+  apk update && apk upgrade
 
 ### Manga Tagger ###
 COPY . /app/Manga-Tagger
@@ -13,6 +11,8 @@ COPY . /app/Manga-Tagger
 RUN \
   echo "Installing Manga-Tagger" && \
   chown abc:abc /app/Manga-Tagger -R
+
+COPY root/ /
 
 RUN \
   echo "Install dependencies" && \
@@ -23,18 +23,9 @@ RUN \
     python3-dev
 
 RUN \
-  pip3 install pymongo python_json_logger image BeautifulSoup4
-
-# Add configuration to Manga-Tagger
-#remove default non-docker-config
-RUN \
-  rm /app/Manga-Tagger/settings.json && \
+  pip3 install pymongo python_json_logger image BeautifulSoup4 && \
   mkdir /manga
 
-COPY settings_docker.json /
-
 # Execute commands at runtime, set permissions
-RUN \
-  echo "/app/Manga-Tagger/docker_scripts/init_mangatagger.sh" >> /etc/cont-init.d/10-adduser
 
 VOLUME /config
