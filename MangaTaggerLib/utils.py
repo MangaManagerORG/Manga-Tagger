@@ -123,10 +123,6 @@ class AppSettings:
         # Debug Mode - Prevent application from processing files
         if settings['application']['debug_mode']:
             QueueWorker._debug_mode = True
-        if os.getenv('MANGA_TAGGER_DEBUG') is True:
-            QueueWorker._debug_mode = True
-        elif os.getenv('MANGA_TAGGER_DEBUG') is False:
-            QueueWorker._debug_mode = False
 
         cls._log.debug(f'Debug Mode: {QueueWorker._debug_mode}')
 
@@ -178,9 +174,9 @@ class AppSettings:
         logging_level = settings['logging_level']
         log_dir = settings['log_dir']
 
-        if logging_level.lower() == 'info':
+        if logging_level.lower() == 'info' and os.getenv("MANGA_TAGGER_LOGGING_LEVEL") is None or os.getenv("MANGA_TAGGER_LOGGING_LEVEL").lower() == 'info':
             logging_level = logging.INFO
-        elif logging_level.lower() == 'debug':
+        elif logging_level.lower() == 'debug' and os.getenv("MANGA_TAGGER_LOGGING_LEVEL") is None or os.getenv("MANGA_TAGGER_LOGGING_LEVEL").lower() == 'debug':
             logging_level = logging.DEBUG
         else:
             logger.critical('Logging level not of expected values "info" or "debug". Double check the configuration'
@@ -194,25 +190,25 @@ class AppSettings:
             Path(log_dir).mkdir()
 
         # Console Logging
-        if settings['console']['enabled']:
+        if settings['console']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_CONSOLE") is None or os.getenv("MANGA_TAGGER_LOGGING_CONSOLE").lower() == 'enabled':
             log_handler = logging.StreamHandler()
             log_handler.setFormatter(logging.Formatter(settings['console']['log_format']))
             logger.addHandler(log_handler)
 
         # File Logging
-        if settings['file']['enabled']:
+        if settings['file']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_FILE") is None or os.getenv("MANGA_TAGGER_LOGGING_FILE").lower() == 'enabled':
             log_handler = cls._create_rotating_file_handler(log_dir, 'log', settings, 'utf-8')
             log_handler.setFormatter(logging.Formatter(settings['file']['log_format']))
             logger.addHandler(log_handler)
 
         # JSON Logging
-        if settings['json']['enabled']:
+        if settings['json']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_JSON") is None or os.getenv("MANGA_TAGGER_LOGGING_JSON").lower() == 'enabled':
             log_handler = cls._create_rotating_file_handler(log_dir, 'json', settings)
             log_handler.setFormatter(jsonlogger.JsonFormatter(settings['json']['log_format']))
             logger.addHandler(log_handler)
 
         # Check TCP and JSON TCP for port conflicts before creating the handlers
-        if settings['tcp']['enabled'] and settings['json_tcp']['enabled']:
+        if settings['tcp']['enabled'] and settings['json_tcp']['enabled'] or os.getenv("MANGA_TAGGER_LOGGING_TCP").lower() == 'enabled' and os.getenv("MANGA_TAGGER_LOGGING_JSONTCP").lower() == 'enabled':
             if settings['tcp']['port'] == settings['json_tcp']['port']:
                 logger.critical('TCP and JSON TCP logging are both enabled, but their port numbers are the same. '
                                 'Either change the port value or disable one of the handlers in settings.json '
@@ -220,13 +216,13 @@ class AppSettings:
                 sys.exit(1)
 
         # TCP Logging
-        if settings['tcp']['enabled']:
+        if settings['tcp']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_TCP") is None or os.getenv("MANGA_TAGGER_LOGGING_TCP").lower() == 'enabled':
             log_handler = SocketHandler(settings['tcp']['host'], settings['tcp']['port'])
             log_handler.setFormatter(logging.Formatter(settings['tcp']['log_format']))
             logger.addHandler(log_handler)
 
         # JSON TCP Logging
-        if settings['json_tcp']['enabled']:
+        if settings['json_tcp']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_JSONTCP") is None or os.getenv("MANGA_TAGGER_LOGGING_JSONTCP").lower() == 'enabled':
             log_handler = SocketHandler(settings['json_tcp']['host'], settings['json_tcp']['port'])
             log_handler.setFormatter(jsonlogger.JsonFormatter(settings['json_tcp']['log_format']))
             logger.addHandler(log_handler)

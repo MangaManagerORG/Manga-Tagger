@@ -5,6 +5,7 @@ if [ -n "${UMASK_SET}" ] && [ -z "${UMASK}" ]; then
   umask ${UMASK_SET}
 fi
 
+chown abc:abc /app/Manga-Tagger -R
 chown abc:abc /manga -R
 chown abc:abc /downloads -R
 

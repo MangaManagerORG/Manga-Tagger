@@ -9,8 +9,7 @@ RUN \
 COPY . /app/Manga-Tagger
 
 RUN \
-  echo "Installing Manga-Tagger" && \
-  chown abc:abc /app/Manga-Tagger -R
+  echo "Installing Manga-Tagger"
 
 COPY root/ /
 
@@ -25,7 +24,5 @@ RUN \
 RUN \
   pip3 install pymongo python_json_logger image BeautifulSoup4 && \
   mkdir /manga
-
-# Execute commands at runtime, set permissions
 
 VOLUME /config
