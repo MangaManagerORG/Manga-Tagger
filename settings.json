@@ -54,7 +54,7 @@
 		"json_tcp": {
 			"enabled": false,
 			"host": "localhost",
-			"port": 1798,
+			"port": 1799,
 			"log_format": "%(threadName)s %(thread)d %(asctime)s %(name)s %(levelname)s %(message)s"
 		}
 	}

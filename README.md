@@ -64,6 +64,11 @@ services:
     restart: unless-stopped
     depends_on:
       - mangatagger-db
+
+#    ports:  # Optional, only useful for TCP and Json TCP logging
+#      - 1798:1798
+#      - 1799:1799
+
   mangatagger-db: # you can use your own mongodb, edit the manga-tagger settings.json accordingly
     image: mongo
     container_name: mangatagger-db
