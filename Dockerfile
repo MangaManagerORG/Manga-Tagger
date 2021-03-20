@@ -10,7 +10,7 @@ COPY . /app/Manga-Tagger
 
 RUN \
   echo "Installing Manga-Tagger" && \
-  chown abc:abc /app/Manga-Tagger -R && \
+  chown abc:abc /app/Manga-Tagger -R
 
 COPY root/ /
 
