@@ -33,7 +33,7 @@ def main():
     AppSettings.load()
 
     LOG.info(f'Starting Manga Tagger - Version {__version__}')
-    LOG.debug('RUNNING IN DEBUG MODE')
+    LOG.debug('RUNNING WITH DEBUG LOG')
 
     if AppSettings.mode_settings is not None:
         LOG.info('DRY RUN MODE ENABLED')

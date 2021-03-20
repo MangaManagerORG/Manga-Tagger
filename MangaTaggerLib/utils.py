@@ -96,10 +96,25 @@ class AppSettings:
 
         # Dry Run Mode Configuration
         # No logging here due to being handled at the INFO level in MangaTaggerLib
-        if settings['application']['dry_run']['enabled']:
+        if settings['application']['dry_run']['enabled'] and os.getenv("MANGA_TAGGER_DRY_RUN") is None or os.getenv("MANGA_TAGGER_DRY_RUN") is not None and os.getenv("MANGA_TAGGER_DRY_RUN").lower() == 'true':
             cls.mode_settings = {'database_insert': settings['application']['dry_run']['database_insert'],
                                  'rename_file': settings['application']['dry_run']['rename_file'],
                                  'write_comicinfo': settings['application']['dry_run']['write_comicinfo']}
+
+            if os.getenv("MANGA_TAGGER_DB_INSERT") is not None and os.getenv("MANGA_TAGGER_DB_INSERT").lower() == 'true':
+                cls.mode_settings = {'database_insert': True}
+            elif os.getenv("MANGA_TAGGER_DB_INSERT") is not None:
+                cls.mode_settings = {'database_insert': False}
+
+            if os.getenv("MANGA_TAGGER_RENAME_FILE") is not None and os.getenv("MANGA_TAGGER_RENAME_FILE").lower() == 'true':
+                cls.mode_settings = {'rename_file': True}
+            elif os.getenv("MANGA_TAGGER_RENAME_FILE") is not None:
+                cls.mode_settings = {'rename_file': False}
+
+            if os.getenv("MANGA_TAGGER_WRITE_COMICINFO") is not None and os.getenv("MANGA_TAGGER_WRITE_COMICINFO").lower() == 'true':
+                cls.mode_settings = {'write_comicinfo': True}
+            elif os.getenv("MANGA_TAGGER_WRITE_COMICINFO") is not None:
+                cls.mode_settings = {'write_comicinfo': False}
 
         # Multithreading Configuration
         if settings['application']['multithreading']['threads'] <= 0 and int(os.getenv("MANGA_TAGGER_THREADS")) is None or int(os.getenv("MANGA_TAGGER_THREADS")) is not None and int(os.getenv("MANGA_TAGGER_THREADS")) <= 0:
@@ -121,7 +136,7 @@ class AppSettings:
         cls._log.debug(f'Max Queue Size: {QueueWorker.max_queue_size}')
 
         # Debug Mode - Prevent application from processing files
-        if settings['application']['debug_mode']:
+        if settings['application']['debug_mode'] and os.getenv("MANGA_TAGGER_DEBUG_MODE") is None or os.getenv("MANGA_TAGGER_DEBUG_MODE") is not None and os.getenv("MANGA_TAGGER_DEBUG_MODE").lower() == 'true':
             QueueWorker._debug_mode = True
 
         cls._log.debug(f'Debug Mode: {QueueWorker._debug_mode}')
@@ -190,19 +205,19 @@ class AppSettings:
             Path(log_dir).mkdir()
 
         # Console Logging
-        if settings['console']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_CONSOLE") is None or os.getenv("MANGA_TAGGER_LOGGING_CONSOLE").lower() == 'enabled':
+        if settings['console']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_CONSOLE") is None or os.getenv("MANGA_TAGGER_LOGGING_CONSOLE").lower() == 'true':
             log_handler = logging.StreamHandler()
             log_handler.setFormatter(logging.Formatter(settings['console']['log_format']))
             logger.addHandler(log_handler)
 
         # File Logging
-        if settings['file']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_FILE") is None or os.getenv("MANGA_TAGGER_LOGGING_FILE").lower() == 'enabled':
+        if settings['file']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_FILE") is None or os.getenv("MANGA_TAGGER_LOGGING_FILE").lower() == 'true':
             log_handler = cls._create_rotating_file_handler(log_dir, 'log', settings, 'utf-8')
             log_handler.setFormatter(logging.Formatter(settings['file']['log_format']))
             logger.addHandler(log_handler)
 
         # JSON Logging
-        if settings['json']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_JSON") is None or os.getenv("MANGA_TAGGER_LOGGING_JSON").lower() == 'enabled':
+        if settings['json']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_JSON") is None or os.getenv("MANGA_TAGGER_LOGGING_JSON").lower() == 'true':
             log_handler = cls._create_rotating_file_handler(log_dir, 'json', settings)
             log_handler.setFormatter(jsonlogger.JsonFormatter(settings['json']['log_format']))
             logger.addHandler(log_handler)
@@ -217,11 +232,11 @@ class AppSettings:
         else:
             json_tcp_logging = False
 
-        if os.getenv("MANGA_TAGGER_LOGGING_TCP") is not None and os.getenv("MANGA_TAGGER_LOGGING_TCP").lower() == 'enabled':
+        if os.getenv("MANGA_TAGGER_LOGGING_TCP") is not None and os.getenv("MANGA_TAGGER_LOGGING_TCP").lower() == 'true':
             tcp_logging = True
         elif os.getenv("MANGA_TAGGER_LOGGING_TCP") is not None:
             tcp_logging = False
-        if os.getenv("MANGA_TAGGER_LOGGING_JSONTCP") is not None and os.getenv("MANGA_TAGGER_LOGGING_JSONTCP").lower() == 'enabled':
+        if os.getenv("MANGA_TAGGER_LOGGING_JSONTCP") is not None and os.getenv("MANGA_TAGGER_LOGGING_JSONTCP").lower() == 'true':
             json_tcp_logging = True
         elif os.getenv("MANGA_TAGGER_LOGGING_JSONTCP") is not None:
             json_tcp_logging = False
