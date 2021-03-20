@@ -3,7 +3,7 @@ ENV TZ="Etc/UTC"
 
 ### Upgrade
 RUN \
-  apk update && apt upgrade
+  apk update && apk upgrade
 
 ### Manga Tagger ###
 COPY . /app/Manga-Tagger
