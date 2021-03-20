@@ -11,7 +11,8 @@ COPY . /app/Manga-Tagger
 RUN \
   echo "Installing Manga-Tagger" && \
   chown abc:abc /app/Manga-Tagger -R && \
-  cp /app/Manga-Tagger/root/* / -r
+
+COPY root/ /
 
 RUN \
   echo "Install dependencies" && \
