@@ -53,7 +53,7 @@ class AniList:
     def search_details_by_series_id(cls, series_id, format, logging_info):
         query = '''
         query search_details_by_series_id ($series_id: int, $format: MediaFormat) {
-          Media (search: $series_id, type: MANGA, format: $format) {
+          Media (id: $series_id, type: MANGA, format: $format) {
             id
             status
             siteUrl
