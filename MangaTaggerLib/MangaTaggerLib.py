@@ -352,7 +352,8 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
         series_title_legal = slugify(series_title)
         LOG.info(f'Manga title found for "{manga_title}" found as "{series_title}".', extra=logging_info)
 
-        anilist_details = AniList.search_details_by_series_title(series_title, format, logging_info)
+        series_id = manga_search['id']
+        anilist_details = AniList.search_details_by_series_id(series_id, format, logging_info)
         LOG.debug(f'anilist_details: {anilist_details}')
 
         try:

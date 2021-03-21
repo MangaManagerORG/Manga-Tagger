@@ -32,6 +32,7 @@ class AniList:
         query = '''
         query search_manga_by_manga_title ($manga_title: String, $format: MediaFormat) {
           Media (search: $manga_title, type: MANGA, format: $format, isAdult: false) {
+            id
             title {
               romaji
               english
@@ -47,12 +48,12 @@ class AniList:
         }
 
         return cls._post(query, variables, logging_info)
-        
+
     @classmethod
-    def search_details_by_series_title(cls, series_title, format, logging_info):
+    def search_details_by_series_id(cls, series_id, format, logging_info):
         query = '''
-        query search_details_by_series_title ($series_title: String, $format: MediaFormat) {
-          Media (search: $series_title, type: MANGA, format: $format) {
+        query search_details_by_series_id ($series_id: String, $format: MediaFormat) {
+          Media (search: $series_id, type: MANGA, format: $format) {
             id
             status
             siteUrl
@@ -91,7 +92,7 @@ class AniList:
         '''
 
         variables = {
-            'series_title': series_title,
+            'series_id': series_id,
             'format': format
         }
         
