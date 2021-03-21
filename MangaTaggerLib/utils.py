@@ -77,14 +77,20 @@ class AppSettings:
 
         # Download Directory Configuration
          # Set the download directory
-        download_dir = Path(settings['application']['library']['download_dir'])
-        if os.getenv("MANGA_TAGGER_DOWNLOAD_DIR") is not None:
-            download_dir = Path(os.getenv("MANGA_TAGGER_DOWNLOAD_DIR"))
-        if not Path(download_dir).exists():
-             cls._log.info(f'Library directory "{AppSettings.library_dir}" does not exist; creating now.')
-             Path(download_dir).mkdir()
-        QueueWorker.download_dir = download_dir
-        cls._log.info(f'Download directory has been set as "{QueueWorker.download_dir}"')
+        if settings['application']['library']['download_dir'] is not None or os.getenv("MANGA_TAGGER_DOWNLOAD_DIR") is not None:
+            if settings['application']['library']['download_dir'] is not None:
+                download_dir = Path(settings['application']['library']['download_dir'])
+            if os.getenv("MANGA_TAGGER_DOWNLOAD_DIR") is not None:
+                download_dir = Path(os.getenv("MANGA_TAGGER_DOWNLOAD_DIR"))
+            if not Path(download_dir).exists():
+                cls._log.info(f'Library directory "{AppSettings.library_dir}" does not exist; creating now.')
+                Path(download_dir).mkdir()
+            QueueWorker.download_dir = download_dir
+            cls._log.info(f'Download directory has been set as "{QueueWorker.download_dir}"')
+        else:
+            cls._log.critical('Manga Tagger cannot function without a download directory for moving processed '
+                              'files into. Configure one in the "settings.json" and try again.')
+            sys.exit(1)
 
         # Set Application Timezone
         cls.timezone = settings['application']['timezone']
@@ -142,19 +148,28 @@ class AppSettings:
         # Image Directory
         if settings['application']['image']['enabled'] and os.getenv("MANGA_TAGGER_IMAGE_COVER") is None or os.getenv("MANGA_TAGGER_IMAGE_COVER") is not None and os.getenv("MANGA_TAGGER_IMAGE_COVER").lower() == 'true':
             cls.image = True
-            cls.image_dir = settings['application']['image']['image_dir']
-            if os.getenv("MANGA_TAGGER_IMAGE_DIR") is not None:
-                cls.image_dir = os.getenv("MANGA_TAGGER_IMAGE_DIR")
-            if not Path(cls.image_dir).exists():
-                cls._log.info(f'Image directory "{cls.image_dir}" does not exist; creating now.')
-                Path(cls.image_dir).mkdir()
-            cls._log.debug(f'Image Directory: {cls.image_dir}')
+            if settings['application']['image']['image_dir'] is not None or os.getenv("MANGA_TAGGER_IMAGE_DIR") is not None:
+                if settings['application']['image']['image_dir'] is not None:
+                    cls.image_dir = settings['application']['image']['image_dir']
+                if os.getenv("MANGA_TAGGER_IMAGE_DIR") is not None:
+                    cls.image_dir = os.getenv("MANGA_TAGGER_IMAGE_DIR")
+                if not Path(cls.image_dir).exists():
+                    cls._log.info(f'Image directory "{cls.image_dir}" does not exist; creating now.')
+                    Path(cls.image_dir).mkdir()
+                cls._log.debug(f'Image Directory: {cls.image_dir}')
+            else:
+                cls._log.critical('Image cover is enabled but cannot function without an image directory for moving downloaded cover images '
+                              'files into. Configure one in the "settings.json" and try again.')
+                sys.exit(1)
         else:
-            cls._log.debug(f'Image Directory not configured')
+            cls._log.debug(f'Image cover not enabled')
 
         # Manga Library Configuration
-        if settings['application']['library']['dir'] is not None:
-            cls.library_dir = settings['application']['library']['dir']
+        if settings['application']['library']['dir'] is not None or os.getenv("MANGA_TAGGER_LIBRARY_DIR") is not None:
+            if settings['application']['library']['dir'] is not None
+                cls.library_dir = settings['application']['library']['dir']
+            if os.getenv("MANGA_TAGGER_LIBRARY_DIR") is not None:
+                cls.library_dir = os.getenv("MANGA_TAGGER_LIBRARY_DIR")
             cls._log.debug(f'Library Directory: {cls.library_dir}')
 
             cls.is_network_path = settings['application']['library']['is_network_path']
