@@ -8,6 +8,7 @@ ENV \
   MANGA_TAGGER_IMAGE_DIR="/config/cover" \
   MANGA_TAGGER_DOWNLOAD_DIR="/downloads" \
   MANGA_TAGGER_LIBRARY_DIR="/manga" \
+  MANGA_TAGGER_LOGGING_DIR="/config/logs" \
   MANGA_TAGGER_DRY_RUN=false \
   MANGA_TAGGER_DB_INSERT=false \
   MANGA_TAGGER_RENAME_FILE=false \
