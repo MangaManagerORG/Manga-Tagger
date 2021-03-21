@@ -80,10 +80,6 @@ class AppSettings:
         download_dir = Path(settings['application']['library']['download_dir'])
         if os.getenv("MANGA_TAGGER_DOWNLOAD_DIR") is not None:
             download_dir = Path(os.getenv("MANGA_TAGGER_DOWNLOAD_DIR"))
-#        if not download_dir.is_absolute():
-#             cls._log.warning(f'"{download_dir}" is not a valid path. The download directory must be an '
-#                                 f'absolute path, such as "/manga". Please select a new download path.')
-#             sys.exit("INVALID PATH, SET A VALID PATH !")
         if not Path(download_dir).exists():
              cls._log.info(f'Library directory "{AppSettings.library_dir}" does not exist; creating now.')
              Path(download_dir).mkdir()
@@ -194,9 +190,9 @@ class AppSettings:
         logging_level = settings['logging_level']
         log_dir = settings['log_dir']
 
-        if logging_level.lower() == 'info' and os.getenv("MANGA_TAGGER_LOGGING_LEVEL") is None or os.getenv("MANGA_TAGGER_LOGGING_LEVEL").lower() == 'info':
+        if logging_level.lower() == 'info' and os.getenv("MANGA_TAGGER_LOGGING_LEVEL") is None or os.getenv("MANGA_TAGGER_LOGGING_LEVEL") is not None and os.getenv("MANGA_TAGGER_LOGGING_LEVEL").lower() == 'info':
             logging_level = logging.INFO
-        elif logging_level.lower() == 'debug' and os.getenv("MANGA_TAGGER_LOGGING_LEVEL") is None or os.getenv("MANGA_TAGGER_LOGGING_LEVEL").lower() == 'debug':
+        elif logging_level.lower() == 'debug' and os.getenv("MANGA_TAGGER_LOGGING_LEVEL") is None or os.getenv("MANGA_TAGGER_LOGGING_LEVEL") is not None and os.getenv("MANGA_TAGGER_LOGGING_LEVEL").lower() == 'debug':
             logging_level = logging.DEBUG
         else:
             logger.critical('Logging level not of expected values "info" or "debug". Double check the configuration'
@@ -210,19 +206,19 @@ class AppSettings:
             Path(log_dir).mkdir()
 
         # Console Logging
-        if settings['console']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_CONSOLE") is None or os.getenv("MANGA_TAGGER_LOGGING_CONSOLE").lower() == 'true':
+        if settings['console']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_CONSOLE") is None or os.getenv("MANGA_TAGGER_LOGGING_CONSOLE") is not None and os.getenv("MANGA_TAGGER_LOGGING_CONSOLE").lower() == 'true':
             log_handler = logging.StreamHandler()
             log_handler.setFormatter(logging.Formatter(settings['console']['log_format']))
             logger.addHandler(log_handler)
 
         # File Logging
-        if settings['file']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_FILE") is None or os.getenv("MANGA_TAGGER_LOGGING_FILE").lower() == 'true':
+        if settings['file']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_FILE") is None or os.getenv("MANGA_TAGGER_LOGGING_FILE") is not None and os.getenv("MANGA_TAGGER_LOGGING_FILE").lower() == 'true':
             log_handler = cls._create_rotating_file_handler(log_dir, 'log', settings, 'utf-8')
             log_handler.setFormatter(logging.Formatter(settings['file']['log_format']))
             logger.addHandler(log_handler)
 
         # JSON Logging
-        if settings['json']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_JSON") is None or os.getenv("MANGA_TAGGER_LOGGING_JSON").lower() == 'true':
+        if settings['json']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_JSON") is None or os.getenv("MANGA_TAGGER_LOGGING_JSON") is not None and os.getenv("MANGA_TAGGER_LOGGING_JSON").lower() == 'true':
             log_handler = cls._create_rotating_file_handler(log_dir, 'json', settings)
             log_handler.setFormatter(jsonlogger.JsonFormatter(settings['json']['log_format']))
             logger.addHandler(log_handler)
