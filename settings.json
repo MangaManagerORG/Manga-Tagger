@@ -2,11 +2,14 @@
 	"application": {
 		"debug_mode": false,
 		"timezone": "Europe/Paris",
-                "image_dir": "/config/cover",
+                "image": {
+                        "enabled" : true,
+                        "image_dir" : "cover"
+                },
 		"library": {
-			"dir": "/manga",
+			"dir": "manga",
 			"is_network_path": false,
-                        "download_dir" : "/downloads"
+                        "download_dir" : "downloads"
 		},
 		"dry_run": {
 			"enabled": false,
@@ -30,7 +33,7 @@
 	},
 	"logger": {
 		"logging_level": "info",
-		"log_dir": "/config/logs",
+		"log_dir": "logs",
 		"max_size": 10485760,
 		"backup_count": 5,
 		"console": {
