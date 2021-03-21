@@ -296,7 +296,8 @@ class AppSettings:
                 "timezone": "Europe/Paris",
                 "image": {
                     "enabled" : True,
-                    "image_dir" : "cover",
+                    "image_dir" : "cover"
+                },
                 "library": {
                     "dir": "manga",
                     "is_network_path": False,
