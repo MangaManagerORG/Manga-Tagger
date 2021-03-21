@@ -203,6 +203,8 @@ class AppSettings:
         logger = logging.getLogger('MangaTaggerLib')
         logging_level = settings['logging_level']
         log_dir = settings['log_dir']
+        if os.getenv("MANGA_TAGGER_LOGGING_DIR") is not None:
+            log_dir = os.getenv("MANGA_TAGGER_LOGGING_DIR")
 
         if logging_level.lower() == 'info' and os.getenv("MANGA_TAGGER_LOGGING_LEVEL") is None or os.getenv("MANGA_TAGGER_LOGGING_LEVEL") is not None and os.getenv("MANGA_TAGGER_LOGGING_LEVEL").lower() == 'info':
             logging_level = logging.INFO
