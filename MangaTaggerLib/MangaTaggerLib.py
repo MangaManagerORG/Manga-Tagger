@@ -96,12 +96,12 @@ def filename_parser(filename, logging_info):
              if "oneshot" in chapter_title.lower():
                  format = "ONE_SHOT"
              chapter_title = "chap000"
-             
+
         if "prologue" in chapter_title.lower():
             chapter_title = chapter_title.replace(' ', '')
             chapter_title = re.sub('^\D*', '', chapter_title)
             chapter_title = "chap000." + chapter_title
-		 
+
         chapter_title = chapter_title.replace(' ', '')
         chapter_title = re.sub('\(\d*\)$', '', chapter_title)
         # Remove (1) (2) .. because it's often redundant and mess with parsing
@@ -333,7 +333,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                      extra=logging_info)
             ProcSeriesTable.processed_series.add(manga_title)
 
-        if AppSettings.image_dir is not None and not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
+        if AppSettings.image and not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
             LOG.info(f'Image directory configured but cover not found. Send request to Anilist for necessary data.', extra=logging_info)
             manga_id = MetadataTable.search_id_by_search_value(series_title)
             anilist_details = AniList.search_staff_by_mal_id(manga_id, logging_info)
@@ -341,13 +341,13 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
         manga_metadata = Metadata(series_title, logging_info, details=manga_search)
         logging_info['metadata'] = manga_metadata.__dict__
     else:
-    
+
         anilist_titles = construct_anilist_titles(manga_search['title'])
         logging_info['anilist_titles'] = anilist_titles
-        
+
         if not anilist_titles == 'None' or anilist_titles is not None:
             manga_found = True
-            
+
         series_title = anilist_titles.get('romaji')
         series_title_legal = slugify(series_title)
         LOG.info(f'Manga title found for "{manga_title}" found as "{series_title}".', extra=logging_info)
@@ -416,7 +416,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
     if AppSettings.mode_settings is None or ('write_comicinfo' in AppSettings.mode_settings.keys()
                                              and AppSettings.mode_settings['write_comicinfo']):
 
-        if AppSettings.image_dir is not None:
+        if AppSettings.image:
             if not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
                 LOG.info('Downloading series cover image...', extra=logging_info)
                 download_cover_image(series_title, anilist_details['coverImage']['extraLarge'])
@@ -526,7 +526,7 @@ def construct_comicinfo_xml(metadata, chapter_number, logging_info):
 def reconstruct_manga_chapter(manga_title, comicinfo_xml, manga_file_path, logging_info):
     try:
         with ZipFile(manga_file_path, 'a') as zipfile:
-            if AppSettings.image_dir is not None and Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
+            if AppSettings.image and Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
                 zipfile.write(f'{AppSettings.image_dir}/{manga_title}_cover.jpg', '000_cover.jpg')
             zipfile.writestr('ComicInfo.xml', comicinfo_xml)
     except Exception as e:

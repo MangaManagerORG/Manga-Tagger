@@ -34,6 +34,8 @@ services:
 
       - MANGA_TAGGER_DEBUG_MODE=false
 
+      - MANGA_TAGGER_IMAGE_COVER=true
+
       - MANGA_TAGGER_DRY_RUN=false
       - MANGA_TAGGER_DB_INSERT=false
       - MANGA_TAGGER_RENAME_FILE=false

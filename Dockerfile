@@ -4,10 +4,12 @@ FROM ghcr.io/linuxserver/baseimage-alpine:3.13
 ENV \
   TZ="Europe/Paris" \
   MANGA_TAGGER_DEBUG_MODE=false \
+  MANGA_TAGGER_IMAGE_COVER=true \
+  MANGA_TAGGER_IMAGE_DIR="/config/cover" \
   MANGA_TAGGER_DRY_RUN=false \
   MANGA_TAGGER_DB_INSERT=false \
   MANGA_TAGGER_RENAME_FILE=false \
-  MANGA_TAGGER_WRITE_COMICINFO=false \
+  MANGA_TAGGER_WRITE_COMICINFO="false" \
   MANGA_TAGGER_THREADS=8 \
   MANGA_TAGGER_MAX_QUEUE_SIZE=0 \
   MANGA_TAGGER_DB_NAME=manga_tagger \

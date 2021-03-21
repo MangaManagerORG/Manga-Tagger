@@ -22,7 +22,7 @@ class AppSettings:
     mode_settings = None
     timezone = None
     version = None
-
+    image = False
     image_dir = None
     library_dir = None
     is_network_path = None
@@ -78,6 +78,8 @@ class AppSettings:
         # Download Directory Configuration
          # Set the download directory
         download_dir = Path(settings['application']['library']['download_dir'])
+        if os.getenv("MANGA_TAGGER_DOWNLOAD_DIR") is not None:
+            download_dir = Path(os.getenv("MANGA_TAGGER_DOWNLOAD_DIR"))
         if not download_dir.is_absolute():
              cls._log.warning(f'"{download_dir}" is not a valid path. The download directory must be an '
                                  f'absolute path, such as "/manga". Please select a new download path.')
@@ -142,8 +144,11 @@ class AppSettings:
         cls._log.debug(f'Debug Mode: {QueueWorker._debug_mode}')
 
         # Image Directory
-        if settings['application']['image_dir'] is not None:
-            cls.image_dir = settings['application']['image_dir']
+        if settings['application']['image']['enabled'] and os.getenv("MANGA_TAGGER_IMAGE_COVER") is None or os.getenv("MANGA_TAGGER_IMAGE_COVER") is not None and os.getenv("MANGA_TAGGER_IMAGE_COVER").lower() == 'true':
+            cls.image = True
+            cls.image_dir = settings['application']['image']['image_dir']
+            if os.getenv("MANGA_TAGGER_IMAGE_DIR") is not None:
+                cls.image_dir = os.getenv("MANGA_TAGGER_IMAGE_DIR")
             if not Path(cls.image_dir).exists():
                 cls._log.info(f'Image directory "{cls.image_dir}" does not exist; creating now.')
                 Path(cls.image_dir).mkdir()
@@ -289,11 +294,13 @@ class AppSettings:
             "application": {
                 "debug_mode": False,
                 "timezone": "Europe/Paris",
-                "image_dir": "/config/cover",
+                "image": {
+                    "enabled" : True,
+                    "image_dir" : "cover",
                 "library": {
-                    "dir": "/manga",
+                    "dir": "manga",
                     "is_network_path": False,
-                    "download_dir": "/downloads"
+                    "download_dir": "downloads"
                 },
                 "dry_run": {
                     "enabled": False,
