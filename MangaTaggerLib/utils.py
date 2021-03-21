@@ -7,7 +7,6 @@ import os
 
 from logging.handlers import RotatingFileHandler, SocketHandler
 from pathlib import Path
-from tkinter import filedialog, messagebox, Tk
 
 import numpy
 import psutil
