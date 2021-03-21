@@ -166,7 +166,7 @@ class AppSettings:
 
         # Manga Library Configuration
         if settings['application']['library']['dir'] is not None or os.getenv("MANGA_TAGGER_LIBRARY_DIR") is not None:
-            if settings['application']['library']['dir'] is not None
+            if settings['application']['library']['dir'] is not None:
                 cls.library_dir = settings['application']['library']['dir']
             if os.getenv("MANGA_TAGGER_LIBRARY_DIR") is not None:
                 cls.library_dir = os.getenv("MANGA_TAGGER_LIBRARY_DIR")
