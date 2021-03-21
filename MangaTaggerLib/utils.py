@@ -288,12 +288,12 @@ class AppSettings:
         return {
             "application": {
                 "debug_mode": False,
-                "timezone": "America/New_York",
-                "image_dir": "/manga",
+                "timezone": "Europe/Paris",
+                "image_dir": "/config/cover",
                 "library": {
-                    "dir": "/manga/library",
+                    "dir": "/manga",
                     "is_network_path": False,
-                    "download_dir": "/manga"
+                    "download_dir": "/downloads"
                 },
                 "dry_run": {
                     "enabled": False,
@@ -329,7 +329,7 @@ class AppSettings:
                     "log_format": "%(asctime)s | %(threadName)s %(thread)d | %(name)s | %(levelname)s - %(message)s"
                 },
                 "json": {
-                    "enabled": True,
+                    "enabled": False,
                     "log_format": "%(threadName)s %(thread)d %(asctime)s %(name)s %(levelname)s %(message)s"
                 },
                 "tcp": {
@@ -341,7 +341,7 @@ class AppSettings:
                 "json_tcp": {
                     "enabled": False,
                     "host": "localhost",
-                    "port": 1798,
+                    "port": 1799,
                     "log_format": "%(threadName)s %(thread)d %(asctime)s %(name)s %(levelname)s %(message)s"
                 }
             }

@@ -1,7 +1,7 @@
 {
 	"application": {
 		"debug_mode": false,
-		"timezone": "America/New_York",
+		"timezone": "Europe/Paris",
                 "image_dir": "/config/cover",
 		"library": {
 			"dir": "/manga",
