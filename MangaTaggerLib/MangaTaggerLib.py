@@ -68,10 +68,10 @@ def process_manga_chapter(file_path: Path, event_id):
 
     # Remove manga directory if empty
     try:
-        LOG.info(f'Trying to delete {dir_path} if empty')
+        LOG.info(f'Trying to delete {directory_path} if empty')
         directory_path.rmdir()
     except OSError as e:
-        LOG.info("Error: %s : %s" % (dir_path, e.strerror))
+        LOG.info("Error: %s : %s" % (directory_path, e.strerror))
 
 def filename_parser(filename, logging_info):
     LOG.info(f'Attempting to rename "{filename}"...', extra=logging_info)
