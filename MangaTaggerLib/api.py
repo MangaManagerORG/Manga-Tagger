@@ -30,7 +30,7 @@ class AniList:
     @classmethod
     def search_for_manga_title_by_manga_title(cls, manga_title, format, isadult, logging_info):
         query = '''
-        query search_manga_by_manga_title ($manga_title: String, $format: MediaFormat) {
+        query search_manga_by_manga_title ($manga_title: String, $format: MediaFormat, $isadult: Boolean) {
           Media (search: $manga_title, type: MANGA, format: $format, isAdult: $isadult) {
             id
             title {
