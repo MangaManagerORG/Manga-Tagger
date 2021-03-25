@@ -68,7 +68,8 @@ def process_manga_chapter(file_path: Path, event_id):
 
     # Remove manga directory if empty
     try:
-        os.rmdir(directory_path)
+        LOG.info(f'Trying to delete {dir_path} if empty')
+        directory_path.rmdir()
     except OSError as e:
         LOG.info("Error: %s : %s" % (dir_path, e.strerror))
 
