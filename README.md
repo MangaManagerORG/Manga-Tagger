@@ -84,7 +84,7 @@ services:
     restart: unless-stopped
 ```  
 
-Environnement Variables overwrite the settings.json.
+Environnement Variables overwrite the settings.json. In docker, it is only possible to configure with environnement variables.
 
 Enabling adult result may give wrong manga match. Make sure the input manga title is as accurate as possible if enabling this or it may confuse Anilist's search.
 
