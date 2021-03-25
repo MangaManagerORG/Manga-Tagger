@@ -291,7 +291,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
             try:
                 if AppSettings.adult_result: # enable adult result in Anilist
                     manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
-                else
+                else:
                     manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
             except (APIException, ConnectionError) as e:
                 LOG.warning(e, extra=logging_info)
@@ -300,7 +300,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                 time.sleep(60)
                 if AppSettings.adult_result: # enable adult result in Anilist
                     manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
-                else
+                else:
                     manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
             if manga_search is None:
                 raise MangaNotFoundError(manga_title)
