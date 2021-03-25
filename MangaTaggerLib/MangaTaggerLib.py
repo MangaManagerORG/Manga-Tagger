@@ -66,6 +66,12 @@ def process_manga_chapter(file_path: Path, event_id):
 
     metadata_tagger(file_path, directory_name, manga_details[0], manga_details[1], logging_info)
 
+    # Remove manga directory if empty
+    try:
+        os.rmdir(directory_path)
+    except OSError as e:
+        LOG.info("Error: %s : %s" % (dir_path, e.strerror))
+
 def filename_parser(filename, logging_info):
     LOG.info(f'Attempting to rename "{filename}"...', extra=logging_info)
 
