@@ -289,7 +289,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
             LOG.info('Manga was not found in the database; resorting to Anilist API.', extra=logging_info)
 
            if AppSettings.adult_result: # enable adult result in Anilist
-               isadult = 'true'
+                isadult = 'true'
 
            try:
                 manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, isadult, logging_info)
