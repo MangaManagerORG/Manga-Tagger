@@ -290,6 +290,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
 
             try:
                 if AppSettings.adult_result: # enable adult result in Anilist
+                    LOG.info('Adult result enabled')
                     manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
                 else:
                     manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
@@ -299,6 +300,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                             'all rate limiting limits...')
                 time.sleep(60)
                 if AppSettings.adult_result: # enable adult result in Anilist
+                    LOG.info('Adult result enabled')
                     manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
                 else:
                     manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)

@@ -167,6 +167,7 @@ class AppSettings:
         # Enable or disable adult result
         if settings['application']['adult_result'] and os.getenv("MANGA_TAGGER_ADULT_RESULT") is None or os.getenv("MANGA_TAGGER_ADULT_RESULT") is not None and os.getenv("MANGA_TAGGER_ADULT_RESULT").lower() == 'true':
             cls.adult_result = True
+            LOG.info('Adult result enabled.')
 
         # Manga Library Configuration
         if settings['application']['library']['dir'] is not None or os.getenv("MANGA_TAGGER_LIBRARY_DIR") is not None:

@@ -86,5 +86,7 @@ services:
 
 Environnement Variables overwrite the settings.json.
 
+Enabling adult result may give wrong manga match. Make sure the input manga title is as accurate as possible if enabling this or it may confuse Anilist's search.
+
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
