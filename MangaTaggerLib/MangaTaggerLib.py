@@ -288,17 +288,20 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
         else:  # The manga is not in the database, so ping the API and create the database
             LOG.info('Manga was not found in the database; resorting to Anilist API.', extra=logging_info)
 
-            if AppSettings.adult_result: # enable adult result in Anilist
-                isadult = True
-
             try:
-                manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, isadult, logging_info)
+                if AppSettings.adult_result: # enable adult result in Anilist
+                    manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
+                else
+                    manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
             except (APIException, ConnectionError) as e:
                 LOG.warning(e, extra=logging_info)
                 LOG.warning('Manga Tagger has unintentionally breached the API limits on Anilist. Waiting 60s to clear '
                             'all rate limiting limits...')
                 time.sleep(60)
-                manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, isadult, logging_info)
+                if AppSettings.adult_result: # enable adult result in Anilist
+                    manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
+                else
+                    manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
             if manga_search is None:
                 raise MangaNotFoundError(manga_title)
             db_exists = False
