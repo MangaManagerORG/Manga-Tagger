@@ -3,6 +3,7 @@ import time
 import re
 import requests
 import unicodedata
+import shutil
 
 from datetime import datetime
 from os import path
@@ -64,6 +65,13 @@ def process_manga_chapter(file_path: Path, event_id):
     manga_details = filename_parser(filename, logging_info)
 
     metadata_tagger(file_path, directory_name, manga_details[0], manga_details[1], logging_info)
+
+    # Remove manga directory if empty
+    try:
+        LOG.info(f'Deleting {directory_path}...')
+        directory_path.rmdir()
+    except OSError as e:
+        LOG.info("Error: %s : %s" % (directory_path, e.strerror))
 
 def filename_parser(filename, logging_info):
     LOG.info(f'Attempting to rename "{filename}"...', extra=logging_info)
@@ -173,7 +181,9 @@ def rename_action(current_file_path: Path, new_file_path: Path, manga_title, cha
     if results is None:
         LOG.info(f'"{manga_title}" chapter {chapter_number} has not been processed before. '
                  f'Proceeding with file rename...', extra=logging_info)
-        ProcFilesTable.insert_record_and_rename(current_file_path, new_file_path, manga_title, chapter_number,
+        shutil.move(current_file_path, new_file_path)
+        LOG.info(f'"{new_file_path.name.strip(".cbz")}" has been renamed.', extra=logging_info)
+        ProcFilesTable.insert_record(current_file_path, new_file_path, manga_title, chapter_number,
                                                 logging_info)
     else:
         versions = ['v2', 'v3', 'v4', 'v5']
@@ -192,7 +202,9 @@ def rename_action(current_file_path: Path, new_file_path: Path, manga_title, cha
                     new_file_path.unlink()
                     LOG.info(f'"{new_file_path.name}" has been deleted! Proceeding to rename new file...',
                              extra=logging_info)
-                    ProcFilesTable.update_record_and_rename(results, current_file_path, new_file_path, logging_info)
+                    shutil.move(current_file_path, new_file_path)
+                    LOG.info(f'"{new_file_path.name.strip(".cbz")}" has been renamed.', extra=logging_info)
+                    ProcFilesTable.update_record(results, current_file_path, new_file_path, logging_info)
                 else:
                     LOG.warning(f'"{current_file_path.name}" was not renamed due being the exact same as the '
                                 f'existing chapter; file currently being processed will be deleted',
