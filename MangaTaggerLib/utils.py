@@ -22,6 +22,7 @@ class AppSettings:
     timezone = None
     version = None
     image = False
+    adult_result = False
     image_dir = None
     library_dir = None
     is_network_path = None
@@ -162,6 +163,10 @@ class AppSettings:
                 sys.exit(1)
         else:
             cls._log.debug(f'Image cover not enabled')
+
+        # Enable or disable adult result
+        if settings['application']['adult_result'] and os.getenv("MANGA_TAGGER_ADULT_RESULT") is None or os.getenv("MANGA_TAGGER_ADULT_RESULT") is not None and os.getenv("MANGA_TAGGER_ADULT_RESULT").lower() == 'true':
+            cls.adult_result = True
 
         # Manga Library Configuration
         if settings['application']['library']['dir'] is not None or os.getenv("MANGA_TAGGER_LIBRARY_DIR") is not None:
@@ -310,6 +315,7 @@ class AppSettings:
                     "enabled" : True,
                     "image_dir" : "cover"
                 },
+                "adult_result" : False,
                 "library": {
                     "dir": "manga",
                     "is_network_path": False,

@@ -28,10 +28,10 @@ class AniList:
         return response.json()['data']['Media']
 
     @classmethod
-    def search_for_manga_title_by_manga_title(cls, manga_title, format, logging_info):
+    def search_for_manga_title_by_manga_title(cls, manga_title, format, isadult, logging_info):
         query = '''
         query search_manga_by_manga_title ($manga_title: String, $format: MediaFormat) {
-          Media (search: $manga_title, type: MANGA, format: $format, isAdult: false) {
+          Media (search: $manga_title, type: MANGA, format: $format, isAdult: $isadult) {
             id
             title {
               romaji
@@ -44,7 +44,8 @@ class AniList:
 
         variables = {
             'manga_title': manga_title,
-            'format': format
+            'format': format,
+            'isadult': isadult
         }
 
         return cls._post(query, variables, logging_info)

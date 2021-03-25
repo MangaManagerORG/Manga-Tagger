@@ -6,6 +6,7 @@
                         "enabled" : true,
                         "image_dir" : "cover"
                 },
+                "adult_result": false,
 		"library": {
 			"dir": "manga",
 			"is_network_path": false,
