@@ -31,7 +31,7 @@ class AniList:
     def search_for_manga_title_by_manga_title(cls, manga_title, format, logging_info):
         query = '''
         query search_manga_by_manga_title ($manga_title: String, $format: MediaFormat) {
-          Media (search: $manga_title, type: MANGA, format: $format, isAdult: False) {
+          Media (search: $manga_title, type: MANGA, format: $format, isAdult: false) {
             id
             title {
               romaji
