@@ -8,6 +8,7 @@ https://hub.docker.com/r/banhcanh/manga-tagger
 input Files and folders still have to be named like this : %MANGA%/%MANGA% -.- %CHAPTER%.cbz
 
 ## Features:
+
 * Does not require FMD2
 * Only scrapes metadata from [Anilist](https://anilist.co/)
 * Support for Manga/Manhwa/Manhua
@@ -18,7 +19,27 @@ input Files and folders still have to be named like this : %MANGA%/%MANGA% -.- %
 More infos:
 https://github.com/Inpacchi/Manga-Tagger
 
-## Docker
+## Downloading and Running Manga-Tagger
+Requirements:
+- git
+- python
+- pip
+
+Clone the sources:
+```
+git clone https://github.com/Banh-Canh/Manga-Tagger.git
+cd Manga-Tagger
+```
+Configure Manga-Tagger by editing the settings.json, then install the dependencies:
+```
+pip install -r requirements.txt
+```
+Finally, run MangaTagger.py:
+```
+python MangaTagger.py
+```
+
+## Running Manga-Tagger with Docker
 ```yaml
 ---
 version: "2.1"
