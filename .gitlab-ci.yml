@@ -1,0 +1,33 @@
+stages:
+    - test
+    - build
+
+MT-filename-parser:
+  stage: test
+#  image: alpine:latest
+  script:
+    #"Installing dependencies..."
+    - apk add python3 py3-pip py3-numpy py3-multidict py3-yarl py3-psutil py3-watchdog py3-requests py3-tz build-base jpeg-dev zlib-dev python3-dev
+    - pip3 install pymongo python_json_logger image BeautifulSoup4
+    #"Testing filename parser and renamer..."
+    - python -m unittest discover -s tests -p 'test_manga.py'
+
+build:
+  stage: build
+  image: "registry.gitlab.com/gitlab-org/cluster-integration/auto-build-image:v0.4.0"
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+  services:
+    - docker:19.03.12-dind
+  script:
+    - |
+      if [[ -z "$CI_COMMIT_TAG" ]]; then
+        export CI_APPLICATION_REPOSITORY=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG}
+        export CI_APPLICATION_TAG=${CI_APPLICATION_TAG:-$CI_COMMIT_SHA}
+      else
+        export CI_APPLICATION_REPOSITORY=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE}
+        export CI_APPLICATION_TAG=${CI_APPLICATION_TAG:-$CI_COMMIT_TAG}
+      fi
+    - /build/build.sh
+  rules:
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
