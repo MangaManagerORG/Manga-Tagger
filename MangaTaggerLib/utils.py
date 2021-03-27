@@ -83,9 +83,9 @@ class AppSettings:
                 cls.download_dir = Path(settings['application']['library']['download_dir'])
             if os.getenv("MANGA_TAGGER_DOWNLOAD_DIR") is not None:
                 cls.download_dir = Path(os.getenv("MANGA_TAGGER_DOWNLOAD_DIR"))
-            if not Path(cls.download_dir).exists():
+            if not cls.download_dir.exists():
                 cls._log.info(f'Library directory "{AppSettings.library_dir}" does not exist; creating now.')
-                Path(cls.download_dir).mkdir()
+                cls.download_dir.mkdir()
             QueueWorker.download_dir = cls.download_dir
             cls._log.info(f'Download directory has been set as "{QueueWorker.download_dir}"')
         else:
