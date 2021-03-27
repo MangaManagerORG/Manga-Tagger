@@ -64,12 +64,13 @@ def process_manga_chapter(file_path: Path, event_id):
 
     manga_details = filename_parser(filename, logging_info)
 
-    metadata_tagger(file_path, directory_name, manga_details[0], manga_details[1], logging_info)
+    metadata_tagger(file_path, manga_details[0], manga_details[1], manga_details[2], logging_info)
 
     # Remove manga directory if empty
     try:
         LOG.info(f'Deleting {directory_path}...')
-        directory_path.rmdir()
+        if directory_path.name != AppSettings.download_dir
+            directory_path.rmdir()
     except OSError as e:
         LOG.info("Error: %s : %s" % (directory_path, e.strerror))
 
@@ -169,7 +170,7 @@ def filename_parser(filename, logging_info):
 
     logging_info['chapter_number'] = chapter_number
 
-    return chapter_number, format
+    return manga_title, chapter_number, format
 
 
 def rename_action(current_file_path: Path, new_file_path: Path, manga_title, chapter_number, logging_info):
