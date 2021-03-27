@@ -314,9 +314,6 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
         series_title = MetadataTable.search_series_title(manga_title)
         series_title_legal = slugify(series_title)
         manga_library_dir = Path(AppSettings.library_dir, series_title_legal)
-        if not manga_library_dir.exists():
-            LOG.info(f'A directory for "{series_title}" in "{AppSettings.library_dir}" does not exist; creating now.')
-            manga_library_dir.mkdir()
         try:
             new_filename = f"{series_title_legal} {manga_chapter_number}.cbz"
             LOG.debug(f'new_filename: {new_filename}')
@@ -326,6 +323,9 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
         new_file_path = Path(manga_library_dir, new_filename)
 
         if AppSettings.mode_settings is None or AppSettings.mode_settings['rename_file']:
+            if not manga_library_dir.exists():
+                LOG.info(f'A directory for "{series_title}" in "{AppSettings.library_dir}" does not exist; creating now.')
+                manga_library_dir.mkdir()
             try:
             # Multithreading Optimization
                 if new_file_path in CURRENTLY_PENDING_RENAME:
@@ -389,10 +389,6 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
         manga_library_dir = Path(AppSettings.library_dir, series_title_legal)
         LOG.debug(f'Manga Library Directory: {manga_library_dir}')
 
-        if not manga_library_dir.exists():
-            LOG.info(f'A directory for "{series_title}" in "{AppSettings.library_dir}" does not exist; creating now.')
-            manga_library_dir.mkdir()
-
         new_file_path = Path(manga_library_dir, new_filename)
         LOG.debug(f'new_file_path: {new_file_path}')
 
@@ -400,6 +396,9 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
 			 extra=logging_info)
 
         if AppSettings.mode_settings is None or AppSettings.mode_settings['rename_file']:
+            if not manga_library_dir.exists():
+                LOG.info(f'A directory for "{series_title}" in "{AppSettings.library_dir}" does not exist; creating now.')
+                manga_library_dir.mkdir()
             try:
 	    # Multithreading Optimization
                 if new_file_path in CURRENTLY_PENDING_RENAME:
@@ -489,7 +488,7 @@ def construct_comicinfo_xml(metadata, chapter_number, logging_info):
     number.text = f'{chapter_number}'
 
     summary = SubElement(comicinfo, 'Summary')
-    soup = BeautifulSoup(metadata.description)
+    soup = BeautifulSoup(metadata.description, "html.parser")
     summary.text = soup.get_text()
 
     publish_date = datetime.strptime(metadata.publish_date, '%Y-%m-%d').date()

@@ -1,0 +1,44 @@
+{
+  "id": 30012,
+  "status": "FINISHED",
+  "siteUrl": "https://anilist.co/manga/30012",
+  "title": {
+	"romaji": "BLEACH",
+	"english": "Bleach",
+	"native": "ブリーチ"
+  },
+  "type": "MANGA",
+  "genres": [
+	"Action",
+	"Adventure",
+	"Supernatural"
+  ],
+  "startDate": {
+	"day": 7,
+	"month": 8,
+	"year": 2001
+  },
+  "coverImage": {
+	"extraLarge": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30012-z7U138mUaPdN.png"
+  },
+  "staff": {
+	"edges": [
+	  {
+		"node": {
+		  "name": {
+			"first": "Tite",
+			"last": "Kubo",
+			"full": "Tite Kubo",
+			"alternative": [
+			  "Taito Kubo",
+			  "Noriaki Kubo (久保宣章)"
+			]
+		  },
+		  "siteUrl": "https://anilist.co/staff/96880"
+		},
+		"role": "Story & Art"
+	  }
+	]
+  },
+  "description": "Ichigo Kurosaki has always been able to see ghosts, but this ability doesn't change his life nearly as much as his close encounter with Rukia Kuchiki, a Soul Reaper and member of the mysterious Soul Society. While fighting a Hollow, an evil spirit that preys on humans who display psychic energy, Rukia attempts to lend Ichigo some of her powers so that he can save his family; but much to her surprise, Ichigo absorbs every last drop of her energy. Now a full-fledged Soul Reaper himself, Ichigo quickly learns that the world he inhabits is one full of dangerous spirits and, along with Rukia— who is slowly regaining her powers— it's Ichigo's job to protect the innocent from Hollows and help the spirits themselves find peace.<br><br>\n(Source: Anime News Network) <br><br>\n<b>20 Included bonus chapters:</b><br>\nVolume 10 - <i>Chapter 88.5: Karakura Super Heroes.</i><br>\nVolume 12 - <i>Chapter 0.8: A Wonderful Error.</i><br>\nVolume 15 - <i>Chapter -17: Prelude for the Straying Stars.</i><br>\nVolume 20 - <i>Chapter -12.5: Blooming Under a Cold Moon.</i><br>\nVolume 23 - <i>Chapter 0.Side-A: The Sand; Chapter 0.Side-B: The Rotator.</i><br>\nVolume 32 - <i>Chapter -16: Death on the Ice Field.</i><br>\nVolume 36 - <i>Chapters -108 to -100: Turn Back the Pendulum (1-9).</i><br>\nVolume 37 - <i>Chapters -99 to -98: Turn Back the Pendulum (10-11); Chapter -97: Let Stop the Pendulum.</i><br>\nVolume 70 - <i>Chapter 520.5: Walk Under Two Letters.</i>"
+}
