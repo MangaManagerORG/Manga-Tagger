@@ -1,0 +1,84 @@
+{
+	"id": 30011,
+	  "status": "FINISHED",
+	  "siteUrl": "https://anilist.co/manga/30011",
+	  "title": {
+		"romaji": "Naruto",
+		"english": "Naruto",
+		"native": "ナルト"
+	  },
+	  "type": "MANGA",
+	  "genres": [
+		"Action",
+		"Adventure"
+	  ],
+	  "startDate": {
+		"day": 21,
+		"month": 9,
+		"year": 1999
+	  },
+	  "coverImage": {
+		"extraLarge": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/nx30011-9yUF1dXWgDOx.jpg"
+	  },
+	  "staff": {
+		"edges": [
+		  {
+			"node": {
+			  "name": {
+				"first": "Masashi",
+				"last": "Kishimoto",
+				"full": "Masashi Kishimoto",
+				"alternative": [
+				  ""
+				]
+			  },
+			  "siteUrl": "https://anilist.co/staff/96879"
+			},
+			"role": "Story & Art"
+		  },
+		  {
+			"node": {
+			  "name": {
+				"first": "Kazuhiro",
+				"last": "Takahashi",
+				"full": "Kazuhiro Takahashi",
+				"alternative": [
+				  ""
+				]
+			  },
+			  "siteUrl": "https://anilist.co/staff/137325"
+			},
+			"role": "Assistant (beta)"
+		  },
+		  {
+			"node": {
+			  "name": {
+				"first": "Osamu",
+				"last": "Kazisa",
+				"full": "Osamu Kazisa",
+				"alternative": [
+				  ""
+				]
+			  },
+			  "siteUrl": "https://anilist.co/staff/137326"
+			},
+			"role": "Assistant (beta)"
+		  },
+		  {
+			"node": {
+			  "name": {
+				"first": "Mikio",
+				"last": "Ikemoto",
+				"full": "Mikio Ikemoto",
+				"alternative": [
+				  ""
+				]
+			  },
+			  "siteUrl": "https://anilist.co/staff/137327"
+			},
+			"role": "Assistant (mob)"
+		  }
+		]
+	  },
+	  "description": "Before Naruto's birth, a great demon fox had attacked the Hidden Leaf Village. A man known as the 4th Hokage sealed the demon inside the newly born Naruto, causing him to unknowingly grow up detested by his fellow villagers. Despite his lack of talent in many areas of ninjutsu, Naruto strives for only one goal: to gain the title of Hokage, the strongest ninja in his village. Desiring the respect he never received, Naruto works towards his dream with fellow friends Sasuke and Sakura and mentor Kakashi as they go through many trials and battles that come with being a ninja. "
+}

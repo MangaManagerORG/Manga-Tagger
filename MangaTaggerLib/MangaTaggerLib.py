@@ -3,6 +3,7 @@ import time
 import re
 import requests
 import unicodedata
+import shutil
 
 from datetime import datetime
 from os import path
@@ -33,7 +34,7 @@ def main():
     AppSettings.load()
 
     LOG.info(f'Starting Manga Tagger - Version {__version__}')
-    LOG.debug('RUNNING IN DEBUG MODE')
+    LOG.debug('RUNNING WITH DEBUG LOG')
 
     if AppSettings.mode_settings is not None:
         LOG.info('DRY RUN MODE ENABLED')
@@ -63,7 +64,16 @@ def process_manga_chapter(file_path: Path, event_id):
 
     manga_details = filename_parser(filename, logging_info)
 
-    metadata_tagger(file_path, directory_name, manga_details[0], manga_details[1], logging_info)
+    metadata_tagger(file_path, manga_details[0], manga_details[1], manga_details[2], logging_info)
+
+    # Remove manga directory if empty
+    try:
+        LOG.info(f'Deleting {directory_path}...')
+        if directory_path != AppSettings.download_dir:
+            LOG.info(f'Deleting {directory_path}...')
+            directory_path.rmdir()
+    except OSError as e:
+        LOG.info("Error: %s : %s" % (directory_path, e.strerror))
 
 def filename_parser(filename, logging_info):
     LOG.info(f'Attempting to rename "{filename}"...', extra=logging_info)
@@ -96,12 +106,12 @@ def filename_parser(filename, logging_info):
              if "oneshot" in chapter_title.lower():
                  format = "ONE_SHOT"
              chapter_title = "chap000"
-             
+
         if "prologue" in chapter_title.lower():
             chapter_title = chapter_title.replace(' ', '')
             chapter_title = re.sub('^\D*', '', chapter_title)
             chapter_title = "chap000." + chapter_title
-		 
+
         chapter_title = chapter_title.replace(' ', '')
         chapter_title = re.sub('\(\d*\)$', '', chapter_title)
         # Remove (1) (2) .. because it's often redundant and mess with parsing
@@ -161,7 +171,7 @@ def filename_parser(filename, logging_info):
 
     logging_info['chapter_number'] = chapter_number
 
-    return chapter_number, format
+    return manga_title, chapter_number, format
 
 
 def rename_action(current_file_path: Path, new_file_path: Path, manga_title, chapter_number, logging_info):
@@ -173,7 +183,9 @@ def rename_action(current_file_path: Path, new_file_path: Path, manga_title, cha
     if results is None:
         LOG.info(f'"{manga_title}" chapter {chapter_number} has not been processed before. '
                  f'Proceeding with file rename...', extra=logging_info)
-        ProcFilesTable.insert_record_and_rename(current_file_path, new_file_path, manga_title, chapter_number,
+        shutil.move(current_file_path, new_file_path)
+        LOG.info(f'"{new_file_path.name.strip(".cbz")}" has been renamed.', extra=logging_info)
+        ProcFilesTable.insert_record(current_file_path, new_file_path, manga_title, chapter_number,
                                                 logging_info)
     else:
         versions = ['v2', 'v3', 'v4', 'v5']
@@ -192,7 +204,9 @@ def rename_action(current_file_path: Path, new_file_path: Path, manga_title, cha
                     new_file_path.unlink()
                     LOG.info(f'"{new_file_path.name}" has been deleted! Proceeding to rename new file...',
                              extra=logging_info)
-                    ProcFilesTable.update_record_and_rename(results, current_file_path, new_file_path, logging_info)
+                    shutil.move(current_file_path, new_file_path)
+                    LOG.info(f'"{new_file_path.name.strip(".cbz")}" has been renamed.', extra=logging_info)
+                    ProcFilesTable.update_record(results, current_file_path, new_file_path, logging_info)
                 else:
                     LOG.warning(f'"{current_file_path.name}" was not renamed due being the exact same as the '
                                 f'existing chapter; file currently being processed will be deleted',
@@ -257,6 +271,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
     manga_search = None
     db_exists = True
     retries = 0
+    isadult = 'false'
 
     LOG.info(f'Table search value is "{manga_title}"', extra=logging_info)
     while manga_search is None:
@@ -276,13 +291,21 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
             LOG.info('Manga was not found in the database; resorting to Anilist API.', extra=logging_info)
 
             try:
-                manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
+                if AppSettings.adult_result: # enable adult result in Anilist
+                    LOG.info('Adult result enabled')
+                    manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
+                else:
+                    manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
             except (APIException, ConnectionError) as e:
                 LOG.warning(e, extra=logging_info)
                 LOG.warning('Manga Tagger has unintentionally breached the API limits on Anilist. Waiting 60s to clear '
                             'all rate limiting limits...')
                 time.sleep(60)
-                manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
+                if AppSettings.adult_result: # enable adult result in Anilist
+                    LOG.info('Adult result enabled')
+                    manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
+                else:
+                    manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
             if manga_search is None:
                 raise MangaNotFoundError(manga_title)
             db_exists = False
@@ -291,9 +314,6 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
         series_title = MetadataTable.search_series_title(manga_title)
         series_title_legal = slugify(series_title)
         manga_library_dir = Path(AppSettings.library_dir, series_title_legal)
-        if not manga_library_dir.exists():
-            LOG.info(f'A directory for "{series_title}" in "{AppSettings.library_dir}" does not exist; creating now.')
-            manga_library_dir.mkdir()
         try:
             new_filename = f"{series_title_legal} {manga_chapter_number}.cbz"
             LOG.debug(f'new_filename: {new_filename}')
@@ -303,6 +323,9 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
         new_file_path = Path(manga_library_dir, new_filename)
 
         if AppSettings.mode_settings is None or AppSettings.mode_settings['rename_file']:
+            if not manga_library_dir.exists():
+                LOG.info(f'A directory for "{series_title}" in "{AppSettings.library_dir}" does not exist; creating now.')
+                manga_library_dir.mkdir()
             try:
             # Multithreading Optimization
                 if new_file_path in CURRENTLY_PENDING_RENAME:
@@ -333,7 +356,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                      extra=logging_info)
             ProcSeriesTable.processed_series.add(manga_title)
 
-        if AppSettings.image_dir is not None and not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
+        if AppSettings.image and not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
             LOG.info(f'Image directory configured but cover not found. Send request to Anilist for necessary data.', extra=logging_info)
             manga_id = MetadataTable.search_id_by_search_value(series_title)
             anilist_details = AniList.search_staff_by_mal_id(manga_id, logging_info)
@@ -341,18 +364,19 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
         manga_metadata = Metadata(series_title, logging_info, details=manga_search)
         logging_info['metadata'] = manga_metadata.__dict__
     else:
-    
+
         anilist_titles = construct_anilist_titles(manga_search['title'])
         logging_info['anilist_titles'] = anilist_titles
-        
+
         if not anilist_titles == 'None' or anilist_titles is not None:
             manga_found = True
-            
+
         series_title = anilist_titles.get('romaji')
         series_title_legal = slugify(series_title)
         LOG.info(f'Manga title found for "{manga_title}" found as "{series_title}".', extra=logging_info)
 
-        anilist_details = AniList.search_details_by_series_title(series_title, format, logging_info)
+        series_id = manga_search['id']
+        anilist_details = AniList.search_details_by_series_id(series_id, format, logging_info)
         LOG.debug(f'anilist_details: {anilist_details}')
 
         try:
@@ -365,10 +389,6 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
         manga_library_dir = Path(AppSettings.library_dir, series_title_legal)
         LOG.debug(f'Manga Library Directory: {manga_library_dir}')
 
-        if not manga_library_dir.exists():
-            LOG.info(f'A directory for "{series_title}" in "{AppSettings.library_dir}" does not exist; creating now.')
-            manga_library_dir.mkdir()
-
         new_file_path = Path(manga_library_dir, new_filename)
         LOG.debug(f'new_file_path: {new_file_path}')
 
@@ -376,6 +396,9 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
 			 extra=logging_info)
 
         if AppSettings.mode_settings is None or AppSettings.mode_settings['rename_file']:
+            if not manga_library_dir.exists():
+                LOG.info(f'A directory for "{series_title}" in "{AppSettings.library_dir}" does not exist; creating now.')
+                manga_library_dir.mkdir()
             try:
 	    # Multithreading Optimization
                 if new_file_path in CURRENTLY_PENDING_RENAME:
@@ -416,7 +439,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
     if AppSettings.mode_settings is None or ('write_comicinfo' in AppSettings.mode_settings.keys()
                                              and AppSettings.mode_settings['write_comicinfo']):
 
-        if AppSettings.image_dir is not None:
+        if AppSettings.image:
             if not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
                 LOG.info('Downloading series cover image...', extra=logging_info)
                 download_cover_image(series_title, anilist_details['coverImage']['extraLarge'])
@@ -465,7 +488,7 @@ def construct_comicinfo_xml(metadata, chapter_number, logging_info):
     number.text = f'{chapter_number}'
 
     summary = SubElement(comicinfo, 'Summary')
-    soup = BeautifulSoup(metadata.description)
+    soup = BeautifulSoup(metadata.description, "html.parser")
     summary.text = soup.get_text()
 
     publish_date = datetime.strptime(metadata.publish_date, '%Y-%m-%d').date()
@@ -526,7 +549,7 @@ def construct_comicinfo_xml(metadata, chapter_number, logging_info):
 def reconstruct_manga_chapter(manga_title, comicinfo_xml, manga_file_path, logging_info):
     try:
         with ZipFile(manga_file_path, 'a') as zipfile:
-            if AppSettings.image_dir is not None and Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
+            if AppSettings.image and Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
                 zipfile.write(f'{AppSettings.image_dir}/{manga_title}_cover.jpg', '000_cover.jpg')
             zipfile.writestr('ComicInfo.xml', comicinfo_xml)
     except Exception as e:

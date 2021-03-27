@@ -8,6 +8,7 @@ https://hub.docker.com/r/banhcanh/manga-tagger
 input Files and folders still have to be named like this : %MANGA%/%MANGA% -.- %CHAPTER%.cbz
 
 ## Features:
+
 * Does not require FMD2
 * Only scrapes metadata from [Anilist](https://anilist.co/)
 * Support for Manga/Manhwa/Manhua
@@ -18,7 +19,27 @@ input Files and folders still have to be named like this : %MANGA%/%MANGA% -.- %
 More infos:
 https://github.com/Inpacchi/Manga-Tagger
 
-## Docker
+## Downloading and Running Manga-Tagger
+Requirements:
+- git
+- python
+- pip
+
+Clone the sources:
+```
+git clone https://github.com/Banh-Canh/Manga-Tagger.git
+cd Manga-Tagger
+```
+Configure Manga-Tagger by editing the settings.json, then install the dependencies:
+```
+pip install -r requirements.txt
+```
+Finally, run MangaTagger.py:
+```
+python MangaTagger.py
+```
+
+## Running Manga-Tagger with Docker
 ```yaml
 ---
 version: "2.1"
@@ -31,6 +52,35 @@ services:
       - PGID=1000
       - TZ=Europe/Paris
       - UMASK=022 #optional
+
+      - MANGA_TAGGER_DEBUG_MODE=false
+
+      - MANGA_TAGGER_IMAGE_COVER=true
+      - MANGA_TAGGER_ADULT_RESULT=false
+
+      - MANGA_TAGGER_DRY_RUN=false
+      - MANGA_TAGGER_DB_INSERT=false
+      - MANGA_TAGGER_RENAME_FILE=false
+      - MANGA_TAGGER_WRITE_COMICINFO=false
+
+      - MANGA_TAGGER_THREADS=8
+      - MANGA_TAGGER_MAX_QUEUE_SIZE=0
+
+      - MANGA_TAGGER_DB_NAME=manga_tagger
+      - MANGA_TAGGER_DB_HOST_ADDRESS=mangatagger-db
+      - MANGA_TAGGER_DB_PORT=27017
+      - MANGA_TAGGER_DB_USERNAME=manga_tagger
+      - MANGA_TAGGER_DB_PASSWORD=Manga4LYFE
+      - MANGA_TAGGER_DB_AUTH_SOURCE=admin
+      - MANGA_TAGGER_DB_SELECTION_TIMEOUT=10000
+
+      - MANGA_TAGGER_LOGGING_LEVEL=info
+      - MANGA_TAGGER_LOGGING_CONSOLE=true
+      - MANGA_TAGGER_LOGGING_FILE=true
+      - MANGA_TAGGER_LOGGING_JSON=false
+      - MANGA_TAGGER_LOGGING_TCP=false
+      - MANGA_TAGGER_LOGGING_JSONTCP=false
+
     volumes:
       - /path/to/config:/config
       - /path/to/library:/manga # directory manga-tagger move tagged files to
@@ -38,6 +88,11 @@ services:
     restart: unless-stopped
     depends_on:
       - mangatagger-db
+
+#    ports:  # Optional, only useful for TCP and Json TCP logging
+#      - 1798:1798
+#      - 1799:1799
+
   mangatagger-db: # you can use your own mongodb, edit the manga-tagger settings.json accordingly
     image: mongo
     container_name: mangatagger-db
@@ -49,6 +104,10 @@ services:
       MONGO_INITDB_DATABASE: manga_tagger
     restart: unless-stopped
 ```  
+
+Environnement Variables overwrite the settings.json. In docker, it is only possible to configure with environnement variables.
+
+Enabling adult result may give wrong manga match. Make sure the input manga title is as accurate as possible if enabling this or it may confuse Anilist's search.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
