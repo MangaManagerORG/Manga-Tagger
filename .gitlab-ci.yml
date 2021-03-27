@@ -10,7 +10,7 @@ MT-filename-parser:
     - apk add python3 py3-pip py3-numpy py3-multidict py3-yarl py3-psutil py3-watchdog py3-requests py3-tz build-base jpeg-dev zlib-dev python3-dev
     - pip3 install pymongo python_json_logger image BeautifulSoup4
     #"Testing filename parser and renamer..."
-    - python -m unittest discover -s tests -p 'test_manga.py'
+    - python3 -m unittest discover -s tests -p 'test_manga.py'
 
 build:
   stage: build
