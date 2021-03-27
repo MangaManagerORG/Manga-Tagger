@@ -23,6 +23,7 @@ class AppSettings:
     version = None
     image = False
     adult_result = False
+    download_dir
     image_dir = None
     library_dir = None
     is_network_path = None
@@ -79,13 +80,13 @@ class AppSettings:
          # Set the download directory
         if settings['application']['library']['download_dir'] is not None or os.getenv("MANGA_TAGGER_DOWNLOAD_DIR") is not None:
             if settings['application']['library']['download_dir'] is not None:
-                download_dir = Path(settings['application']['library']['download_dir'])
+                cls.download_dir = Path(settings['application']['library']['download_dir'])
             if os.getenv("MANGA_TAGGER_DOWNLOAD_DIR") is not None:
-                download_dir = Path(os.getenv("MANGA_TAGGER_DOWNLOAD_DIR"))
+                cls.download_dir = Path(os.getenv("MANGA_TAGGER_DOWNLOAD_DIR"))
             if not Path(download_dir).exists():
                 cls._log.info(f'Library directory "{AppSettings.library_dir}" does not exist; creating now.')
-                Path(download_dir).mkdir()
-            QueueWorker.download_dir = download_dir
+                Path(cls.download_dir).mkdir()
+            QueueWorker.download_dir = cls.download_dir
             cls._log.info(f'Download directory has been set as "{QueueWorker.download_dir}"')
         else:
             cls._log.critical('Manga Tagger cannot function without a download directory for moving processed '
