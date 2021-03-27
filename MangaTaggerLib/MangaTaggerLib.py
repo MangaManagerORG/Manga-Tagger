@@ -70,6 +70,7 @@ def process_manga_chapter(file_path: Path, event_id):
     try:
         LOG.info(f'Deleting {directory_path}...')
         if directory_path != AppSettings.download_dir:
+            LOG.info(f'Deleting {directory_path}...')
             directory_path.rmdir()
     except OSError as e:
         LOG.info("Error: %s : %s" % (directory_path, e.strerror))
