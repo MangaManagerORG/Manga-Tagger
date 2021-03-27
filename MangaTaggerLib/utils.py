@@ -23,7 +23,7 @@ class AppSettings:
     version = None
     image = False
     adult_result = False
-    download_dir
+    download_dir = None
     image_dir = None
     library_dir = None
     is_network_path = None
