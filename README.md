@@ -5,7 +5,7 @@ This fork doesn't require FMD2. Running MangaTagger.py will make it watch the di
 Intended to be used in a docker container:
 https://hub.docker.com/r/banhcanh/manga-tagger
 
-input Files and folders still have to be named like this : %MANGA%/%MANGA% -.- %CHAPTER%.cbz
+input Files still have to be named like this (they can be in their own %MANGA% directory, or not) : %MANGA% -.- %CHAPTER%.cbz
 
 ## Features:
 
