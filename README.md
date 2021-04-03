@@ -105,6 +105,8 @@ services:
     restart: unless-stopped
 ```  
 
+I recommend using this with my FMD2 docker image: https://hub.docker.com/r/banhcanh/docker-fmd2
+
 Environnement Variables overwrite the settings.json. In docker, it is only possible to configure with environnement variables.
 
 Enabling adult result may give wrong manga match. Make sure the input manga title is as accurate as possible if enabling this or it may confuse Anilist's search.
