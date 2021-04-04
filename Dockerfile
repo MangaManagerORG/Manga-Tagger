@@ -1,5 +1,8 @@
 FROM ghcr.io/linuxserver/baseimage-alpine:3.13
 
+LABEL \
+  maintainer="TKVictor-Hang@outlook.fr"
+
 ### Set default Timezone, overwrite default MangaTagger settings for the container ###
 ENV \
   TZ="Europe/Paris" \
