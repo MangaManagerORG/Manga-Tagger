@@ -56,6 +56,7 @@ RUN \
 
 RUN \
   pip3 install pymongo python_json_logger image BeautifulSoup4 && \
-  mkdir /manga
+  mkdir /manga && \
+  mkdir /downloads
 
 VOLUME /config

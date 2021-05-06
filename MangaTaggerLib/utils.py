@@ -43,6 +43,110 @@ class AppSettings:
                 settings = cls._create_settings()
                 json.dump(settings, settings_json, indent=4)
 
+        with open(settings_location, 'r+') as settings_json:
+            if os.getenv("MANGA_TAGGER_DB_NAME") is not None:
+                settings['database']['database_name'] = os.getenv("MANGA_TAGGER_DB_NAME")
+            if os.getenv("MANGA_TAGGER_DB_HOST_ADDRESS") is not None:
+                settings['database']['host_address'] = os.getenv("MANGA_TAGGER_DB_HOST_ADDRESS")
+            if os.getenv("MANGA_TAGGER_DB_PORT") is not None:
+                settings['database']['port'] = int(os.getenv("MANGA_TAGGER_DB_PORT"))
+            if os.getenv("MANGA_TAGGER_DB_USERNAME") is not None:
+                settings['database']['username'] = os.getenv("MANGA_TAGGER_DB_USERNAME")
+            if os.getenv("MANGA_TAGGER_DB_PASSWORD") is not None:
+                settings['database']['password'] = os.getenv("MANGA_TAGGER_DB_PASSWORD")
+            if os.getenv("MANGA_TAGGER_DB_AUTH_SOURCE") is not None:
+                settings['database']['auth_source'] = os.getenv("MANGA_TAGGER_DB_AUTH_SOURCE")
+            if os.getenv("MANGA_TAGGER_DB_SELECTION_TIMEOUT") is not None:
+                settings['database']['server_selection_timeout_ms'] = int(os.getenv("MANGA_TAGGER_DB_SELECTION_TIMEOUT"))
+
+            if os.getenv("MANGA_TAGGER_DOWNLOAD_DIR") is not None:
+                settings['application']['library']['download_dir'] = os.getenv("MANGA_TAGGER_DOWNLOAD_DIR")
+
+            if os.getenv('TZ') is not None:
+                settings['application']['timezone'] = os.getenv("TZ")
+
+            if os.getenv("MANGA_TAGGER_DRY_RUN") is not None:
+                if os.getenv("MANGA_TAGGER_DRY_RUN").lower() == 'true':
+                    settings['application']['dry_run']['enabled'] = True
+                elif os.getenv("MANGA_TAGGER_DRY_RUN").lower() == 'false':
+                    settings['application']['dry_run']['enabled'] = False
+            if os.getenv("MANGA_TAGGER_DB_INSERT") is not None:
+                if os.getenv("MANGA_TAGGER_DB_INSERT").lower() == 'true':
+                    settings['application']['dry_run']['database_insert'] = True
+                elif os.getenv("MANGA_TAGGER_DB_INSERT").lower() == 'false':
+                    settings['application']['dry_run']['database_insert'] = False
+            if os.getenv("MANGA_TAGGER_RENAME_FILE") is not None:
+                if os.getenv("MANGA_TAGGER_RENAME_FILE").lower() == 'true':
+                    settings['application']['dry_run']['rename_file'] = True
+                elif os.getenv("MANGA_TAGGER_RENAME_FILE").lower() == 'false':
+                    settings['application']['dry_run']['rename_file'] = False
+            if os.getenv("MANGA_TAGGER_WRITE_COMICINFO") is not None:
+                if os.getenv("MANGA_TAGGER_WRITE_COMICINFO").lower() == 'true':
+                    settings['application']['dry_run']['write_comicinfo'] = True
+                elif os.getenv("MANGA_TAGGER_WRITE_COMICINFO").lower() == 'false':
+                    settings['application']['dry_run']['write_comicinfo'] = False
+
+            if os.getenv("MANGA_TAGGER_THREADS") is not None:
+                settings['application']['multithreading']['threads'] = int(os.getenv("MANGA_TAGGER_THREADS"))
+            if os.getenv("MANGA_TAGGER_MAX_QUEUE_SIZE") is not None:
+                settings['application']['multithreading']['max_queue_size'] = int(os.getenv("MANGA_TAGGER_MAX_QUEUE_SIZE"))
+
+            if os.getenv("MANGA_TAGGER_DEBUG_MODE") is not None:
+                if os.getenv("MANGA_TAGGER_DEBUG_MODE").lower() == 'true':
+                    settings['application']['debug_mode'] = True
+                elif os.getenv("MANGA_TAGGER_DEBUG_MODE").lower() == 'false':
+                    settings['application']['debug_mode'] = False
+
+            if os.getenv("MANGA_TAGGER_IMAGE_COVER") is not None:
+                if os.getenv("MANGA_TAGGER_IMAGE_COVER").lower() == 'true':
+                    settings['application']['image']['enabled'] = True
+                elif os.getenv("MANGA_TAGGER_IMAGE_COVER").lower() == 'false':
+                    settings['application']['image']['enabled'] = False
+            if os.getenv("MANGA_TAGGER_IMAGE_DIR") is not None:
+                settings['application']['image']['image_dir'] = os.getenv("MANGA_TAGGER_IMAGE_DIR")
+
+            if os.getenv("MANGA_TAGGER_ADULT_RESULT") is not None:
+                if os.getenv("MANGA_TAGGER_ADULT_RESULT").lower() == 'true':
+                    settings['application']['adult_result'] = True
+                elif os.getenv("MANGA_TAGGER_ADULT_RESULT").lower() == 'false':
+                    settings['application']['adult_result'] = False
+
+            if os.getenv("MANGA_TAGGER_LIBRARY_DIR") is not None:
+                settings['application']['library']['dir'] = os.getenv("MANGA_TAGGER_LIBRARY_DIR")
+
+            if os.getenv("MANGA_TAGGER_LOGGING_LEVEL") is not None:
+                settings['logger']['logging_level'] = os.getenv("MANGA_TAGGER_LOGGING_LEVEL")
+            if os.getenv("MANGA_TAGGER_LOGGING_DIR") is not None:
+                settings['logger']['log_dir'] = os.getenv("MANGA_TAGGER_LOGGING_DIR")
+            if os.getenv("MANGA_TAGGER_LOGGING_CONSOLE") is not None:
+                if os.getenv("MANGA_TAGGER_LOGGING_CONSOLE").lower() == 'true':
+                    settings['logger']['console']['enabled'] = True
+                elif os.getenv("MANGA_TAGGER_LOGGING_CONSOLE").lower() == 'false':
+                    settings['logger']['console']['enabled'] = False
+            if os.getenv("MANGA_TAGGER_LOGGING_FILE") is not None:
+                if os.getenv("MANGA_TAGGER_LOGGING_FILE").lower() == 'true':
+                    settings['logger']['file']['enabled'] = True
+                elif os.getenv("MANGA_TAGGER_LOGGING_FILE").lower() == 'false':
+                    settings['logger']['file']['enabled'] = False
+            if os.getenv("MANGA_TAGGER_LOGGING_JSON") is not None:
+                if os.getenv("MANGA_TAGGER_LOGGING_JSON").lower() == 'true':
+                    settings['logger']['json']['enabled'] = True
+                elif os.getenv("MANGA_TAGGER_LOGGING_JSON").lower() == 'false':
+                    settings['logger']['json']['enabled'] = False
+            if os.getenv("MANGA_TAGGER_LOGGING_TCP") is not None:
+                if os.getenv("MANGA_TAGGER_LOGGING_TCP").lower() == 'true':
+                    settings['logger']['tcp']['enabled'] = True
+                elif os.getenv("MANGA_TAGGER_LOGGING_TCP").lower() == 'false':
+                    settings['logger']['tcp']['enabled'] = False
+            if os.getenv("MANGA_TAGGER_LOGGING_JSONTCP") is not None:
+                if os.getenv("MANGA_TAGGER_LOGGING_JSONTCP").lower() == 'true':
+                    settings['logger']['json_tcp']['enabled'] = True
+                elif os.getenv("MANGA_TAGGER_LOGGING_JSONTCP").lower() == 'false':
+                    settings['logger']['json_tcp']['enabled'] = False
+
+        with open(settings_location, 'w+') as settings_json:
+                json.dump(settings, settings_json, indent=4)
+
         cls._initialize_logger(settings['logger'])
         cls._log = logging.getLogger(f'{cls.__module__}.{cls.__name__}')
 
@@ -57,32 +161,14 @@ class AppSettings:
         Database.auth_source = settings['database']['auth_source']
         Database.server_selection_timeout_ms = settings['database']['server_selection_timeout_ms']
 
-        if os.getenv("MANGA_TAGGER_DB_NAME") is not None:
-            Database.database_name = os.getenv("MANGA_TAGGER_DB_NAME")
-        if os.getenv("MANGA_TAGGER_DB_HOST_ADDRESS") is not None:
-            Database.host_address = os.getenv("MANGA_TAGGER_DB_HOST_ADDRESS")
-        if os.getenv("MANGA_TAGGER_DB_PORT") is not None:
-            Database.port = int(os.getenv("MANGA_TAGGER_DB_PORT"))
-        if os.getenv("MANGA_TAGGER_DB_USERNAME") is not None:
-            Database.username = os.getenv("MANGA_TAGGER_DB_USERNAME")
-        if os.getenv("MANGA_TAGGER_DB_PASSWORD") is not None:
-            Database.password = os.getenv("MANGA_TAGGER_DB_PASSWORD")
-        if os.getenv("MANGA_TAGGER_DB_AUTH_SOURCE") is not None:
-            Database.auth_source = os.getenv("MANGA_TAGGER_DB_AUTH_SOURCE")
-        if os.getenv("MANGA_TAGGER_DB_SELECTION_TIMEOUT") is not None:
-            Database.server_selection_timeout_ms = int(os.getenv("MANGA_TAGGER_DB_SELECTION_TIMEOUT"))
-
         cls._log.debug('Database settings configured!')
         Database.initialize()
         Database.print_debug_settings()
 
         # Download Directory Configuration
          # Set the download directory
-        if settings['application']['library']['download_dir'] is not None or os.getenv("MANGA_TAGGER_DOWNLOAD_DIR") is not None:
-            if settings['application']['library']['download_dir'] is not None:
-                cls.download_dir = Path(settings['application']['library']['download_dir'])
-            if os.getenv("MANGA_TAGGER_DOWNLOAD_DIR") is not None:
-                cls.download_dir = Path(os.getenv("MANGA_TAGGER_DOWNLOAD_DIR"))
+        if settings['application']['library']['download_dir'] is not None:
+            cls.download_dir = Path(settings['application']['library']['download_dir'])
             if not cls.download_dir.exists():
                 cls._log.info(f'Library directory "{AppSettings.library_dir}" does not exist; creating now.')
                 cls.download_dir.mkdir()
@@ -101,59 +187,38 @@ class AppSettings:
 
         # Dry Run Mode Configuration
         # No logging here due to being handled at the INFO level in MangaTaggerLib
-        if settings['application']['dry_run']['enabled'] and os.getenv("MANGA_TAGGER_DRY_RUN") is None or os.getenv("MANGA_TAGGER_DRY_RUN") is not None and os.getenv("MANGA_TAGGER_DRY_RUN").lower() == 'true':
+        if settings['application']['dry_run']['enabled']:
             cls.mode_settings = {'database_insert': settings['application']['dry_run']['database_insert'],
                                  'rename_file': settings['application']['dry_run']['rename_file'],
                                  'write_comicinfo': settings['application']['dry_run']['write_comicinfo']}
 
-            if os.getenv("MANGA_TAGGER_DB_INSERT") is not None and os.getenv("MANGA_TAGGER_DB_INSERT").lower() == 'true':
-                cls.mode_settings['database_insert'] = True
-            elif os.getenv("MANGA_TAGGER_DB_INSERT") is not None:
-                cls.mode_settings['database_insert'] = False
-
-            if os.getenv("MANGA_TAGGER_RENAME_FILE") is not None and os.getenv("MANGA_TAGGER_RENAME_FILE").lower() == 'true':
-                cls.mode_settings['rename_file'] = True
-            elif os.getenv("MANGA_TAGGER_RENAME_FILE") is not None:
-                cls.mode_settings['rename_file'] = False
-
-            if os.getenv("MANGA_TAGGER_WRITE_COMICINFO") is not None and os.getenv("MANGA_TAGGER_WRITE_COMICINFO").lower() == 'true':
-                cls.mode_settings['write_comicinfo'] = True
-            elif os.getenv("MANGA_TAGGER_WRITE_COMICINFO") is not None:
-                cls.mode_settings['write_comicinfo'] = False
-
         # Multithreading Configuration
-        if settings['application']['multithreading']['threads'] <= 0 and int(os.getenv("MANGA_TAGGER_THREADS")) is None or int(os.getenv("MANGA_TAGGER_THREADS")) is not None and int(os.getenv("MANGA_TAGGER_THREADS")) <= 0:
+        if settings['application']['multithreading']['threads'] <= 0:
             QueueWorker.threads = 1
         else:
             QueueWorker.threads = settings['application']['multithreading']['threads']
-            if int(os.getenv("MANGA_TAGGER_THREADS")) is not None:
-                QueueWorker.threads = int(os.getenv("MANGA_TAGGER_THREADS"))
 
         cls._log.debug(f'Threads: {QueueWorker.threads}')
 
-        if settings['application']['multithreading']['max_queue_size'] < 0 and int(os.getenv("MANGA_TAGGER_MAX_QUEUE_SIZE")) is None or int(os.getenv("MANGA_TAGGER_MAX_QUEUE_SIZE")) is not None and int(os.getenv("MANGA_TAGGER_MAX_QUEUE_SIZE")) < 0:
+        if settings['application']['multithreading']['max_queue_size'] < 0:
             QueueWorker.max_queue_size = 0
         else:
             QueueWorker.max_queue_size = settings['application']['multithreading']['max_queue_size']
-            if int(os.getenv("MANGA_TAGGER_MAX_QUEUE_SIZE")) is not None:
-                QueueWorker.max_queue_size = int(os.getenv("MANGA_TAGGER_MAX_QUEUE_SIZE"))
 
         cls._log.debug(f'Max Queue Size: {QueueWorker.max_queue_size}')
 
         # Debug Mode - Prevent application from processing files
-        if settings['application']['debug_mode'] and os.getenv("MANGA_TAGGER_DEBUG_MODE") is None or os.getenv("MANGA_TAGGER_DEBUG_MODE") is not None and os.getenv("MANGA_TAGGER_DEBUG_MODE").lower() == 'true':
+        if settings['application']['debug_mode']:
             QueueWorker._debug_mode = True
 
         cls._log.debug(f'Debug Mode: {QueueWorker._debug_mode}')
 
         # Image Directory
-        if settings['application']['image']['enabled'] and os.getenv("MANGA_TAGGER_IMAGE_COVER") is None or os.getenv("MANGA_TAGGER_IMAGE_COVER") is not None and os.getenv("MANGA_TAGGER_IMAGE_COVER").lower() == 'true':
+        if settings['application']['image']['enabled']:
             cls.image = True
-            if settings['application']['image']['image_dir'] is not None or os.getenv("MANGA_TAGGER_IMAGE_DIR") is not None:
+            if settings['application']['image']['image_dir'] is not None:
                 if settings['application']['image']['image_dir'] is not None:
                     cls.image_dir = settings['application']['image']['image_dir']
-                if os.getenv("MANGA_TAGGER_IMAGE_DIR") is not None:
-                    cls.image_dir = os.getenv("MANGA_TAGGER_IMAGE_DIR")
                 if not Path(cls.image_dir).exists():
                     cls._log.info(f'Image directory "{cls.image_dir}" does not exist; creating now.')
                     Path(cls.image_dir).mkdir()
@@ -166,16 +231,13 @@ class AppSettings:
             cls._log.debug(f'Image cover not enabled')
 
         # Enable or disable adult result
-        if settings['application']['adult_result'] and os.getenv("MANGA_TAGGER_ADULT_RESULT") is None or os.getenv("MANGA_TAGGER_ADULT_RESULT") is not None and os.getenv("MANGA_TAGGER_ADULT_RESULT").lower() == 'true':
+        if settings['application']['adult_result']:
             cls.adult_result = True
             LOG.info('Adult result enabled.')
 
         # Manga Library Configuration
-        if settings['application']['library']['dir'] is not None or os.getenv("MANGA_TAGGER_LIBRARY_DIR") is not None:
-            if settings['application']['library']['dir'] is not None:
-                cls.library_dir = settings['application']['library']['dir']
-            if os.getenv("MANGA_TAGGER_LIBRARY_DIR") is not None:
-                cls.library_dir = os.getenv("MANGA_TAGGER_LIBRARY_DIR")
+        if settings['application']['library']['dir'] is not None:
+            cls.library_dir = settings['application']['library']['dir']
             cls._log.debug(f'Library Directory: {cls.library_dir}')
 
             cls.is_network_path = settings['application']['library']['is_network_path']
@@ -210,12 +272,10 @@ class AppSettings:
         logger = logging.getLogger('MangaTaggerLib')
         logging_level = settings['logging_level']
         log_dir = settings['log_dir']
-        if os.getenv("MANGA_TAGGER_LOGGING_DIR") is not None:
-            log_dir = os.getenv("MANGA_TAGGER_LOGGING_DIR")
 
-        if logging_level.lower() == 'info' and os.getenv("MANGA_TAGGER_LOGGING_LEVEL") is None or os.getenv("MANGA_TAGGER_LOGGING_LEVEL") is not None and os.getenv("MANGA_TAGGER_LOGGING_LEVEL").lower() == 'info':
+        if logging_level.lower() == 'info':
             logging_level = logging.INFO
-        elif logging_level.lower() == 'debug' and os.getenv("MANGA_TAGGER_LOGGING_LEVEL") is None or os.getenv("MANGA_TAGGER_LOGGING_LEVEL") is not None and os.getenv("MANGA_TAGGER_LOGGING_LEVEL").lower() == 'debug':
+        elif logging_level.lower() == 'debug':
             logging_level = logging.DEBUG
         else:
             logger.critical('Logging level not of expected values "info" or "debug". Double check the configuration'
@@ -229,43 +289,25 @@ class AppSettings:
             Path(log_dir).mkdir()
 
         # Console Logging
-        if settings['console']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_CONSOLE") is None or os.getenv("MANGA_TAGGER_LOGGING_CONSOLE") is not None and os.getenv("MANGA_TAGGER_LOGGING_CONSOLE").lower() == 'true':
+        if settings['console']['enabled']:
             log_handler = logging.StreamHandler()
             log_handler.setFormatter(logging.Formatter(settings['console']['log_format']))
             logger.addHandler(log_handler)
 
         # File Logging
-        if settings['file']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_FILE") is None or os.getenv("MANGA_TAGGER_LOGGING_FILE") is not None and os.getenv("MANGA_TAGGER_LOGGING_FILE").lower() == 'true':
+        if settings['file']['enabled']:
             log_handler = cls._create_rotating_file_handler(log_dir, 'log', settings, 'utf-8')
             log_handler.setFormatter(logging.Formatter(settings['file']['log_format']))
             logger.addHandler(log_handler)
 
         # JSON Logging
-        if settings['json']['enabled'] and os.getenv("MANGA_TAGGER_LOGGING_JSON") is None or os.getenv("MANGA_TAGGER_LOGGING_JSON") is not None and os.getenv("MANGA_TAGGER_LOGGING_JSON").lower() == 'true':
+        if settings['json']['enabled']:
             log_handler = cls._create_rotating_file_handler(log_dir, 'json', settings)
             log_handler.setFormatter(jsonlogger.JsonFormatter(settings['json']['log_format']))
             logger.addHandler(log_handler)
 
         # Check TCP and JSON TCP for port conflicts before creating the handlers
-        if settings['tcp']['enabled']:
-            tcp_logging = True
-        else:
-            tcp_logging = False
-        if settings['json_tcp']['enabled']:
-            json_tcp_logging = True
-        else:
-            json_tcp_logging = False
-
-        if os.getenv("MANGA_TAGGER_LOGGING_TCP") is not None and os.getenv("MANGA_TAGGER_LOGGING_TCP").lower() == 'true':
-            tcp_logging = True
-        elif os.getenv("MANGA_TAGGER_LOGGING_TCP") is not None:
-            tcp_logging = False
-        if os.getenv("MANGA_TAGGER_LOGGING_JSONTCP") is not None and os.getenv("MANGA_TAGGER_LOGGING_JSONTCP").lower() == 'true':
-            json_tcp_logging = True
-        elif os.getenv("MANGA_TAGGER_LOGGING_JSONTCP") is not None:
-            json_tcp_logging = False
-
-        if tcp_logging and json_tcp_logging:
+        if settings['tcp']['enabled'] and settings['json_tcp']['enabled']:
             if settings['tcp']['port'] == settings['json_tcp']['port']:
                 logger.critical('TCP and JSON TCP logging are both enabled, but their port numbers are the same. '
                                 'Either change the port value or disable one of the handlers in settings.json '
@@ -273,13 +315,13 @@ class AppSettings:
                 sys.exit(1)
 
         # TCP Logging
-        if tcp_logging:
+        if settings['tcp']['enabled']:
             log_handler = SocketHandler(settings['tcp']['host'], settings['tcp']['port'])
             log_handler.setFormatter(logging.Formatter(settings['tcp']['log_format']))
             logger.addHandler(log_handler)
 
         # JSON TCP Logging
-        if json_tcp_logging:
+        if settings['json_tcp']['enabled']:
             log_handler = SocketHandler(settings['json_tcp']['host'], settings['json_tcp']['port'])
             log_handler.setFormatter(jsonlogger.JsonFormatter(settings['json_tcp']['log_format']))
             logger.addHandler(log_handler)
