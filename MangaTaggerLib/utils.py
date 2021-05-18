@@ -233,7 +233,7 @@ class AppSettings:
         # Enable or disable adult result
         if settings['application']['adult_result']:
             cls.adult_result = True
-            LOG.info('Adult result enabled.')
+            cls._log.info('Adult result enabled.')
 
         # Manga Library Configuration
         if settings['application']['library']['dir'] is not None:
