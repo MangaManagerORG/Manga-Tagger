@@ -98,10 +98,6 @@ def filename_parser(filename, logging_info):
 
     # If "chapter" is in the chapter substring
     try:
-        if manga_title.lower() in chapter_title:
-            if compare(manga_title, chapter_title) > .5 and compare(manga_title, chapter_title[:len(manga_title)]) > .8:
-                raise MangaMatchedException()
-
         if not hasNumbers(chapter_title):
              if "oneshot" in chapter_title.lower():
                  format = "ONE_SHOT"
@@ -132,14 +128,6 @@ def filename_parser(filename, logging_info):
     except UnparsableFilenameError as ufe:
         LOG.exception(ufe, extra=logging_info)
         return None
-    except MangaMatchedException:
-        if 'chapter' in chapter_title:
-            chapter_title = chapter_title.replace(' ', '')
-            delimiter = f'{manga_title.lower()}chapter'
-            delimiter_index = len(delimiter) + 1
-        else:
-            delimiter = manga_title.lower()
-            delimiter_index = len(delimiter) + 1
 
     LOG.debug(f'delimiter: {delimiter}')
     LOG.debug(f'delimiter_index: {delimiter_index}')
