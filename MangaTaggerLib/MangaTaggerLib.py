@@ -4,6 +4,7 @@ import re
 import requests
 import unicodedata
 import shutil
+import json
 
 from datetime import datetime
 from os import path
@@ -260,6 +261,12 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
     db_exists = True
     retries = 0
     isadult = 'false'
+
+    if Path(f'{AppSettings.data_dir}/exceptions.json').exists():
+        with open(f'{AppSettings.data_dir}/exceptions.json', 'r') as exceptions_json:
+            exceptions = json.load(exceptions_json)
+        if manga_title in exceptions:
+            manga_title = exceptions.get(manga_title)
 
     LOG.info(f'Table search value is "{manga_title}"', extra=logging_info)
     while manga_search is None:
