@@ -7,6 +7,7 @@ LABEL \
 ENV \
   TZ="Europe/Paris" \
   MANGA_TAGGER_DEBUG_MODE=false \
+  MANGA_TAGGER_DATA_DIR="/config/data" \
   MANGA_TAGGER_IMAGE_COVER=true \
   MANGA_TAGGER_IMAGE_DIR="/config/cover" \
   MANGA_TAGGER_ADULT_RESULT=false \
