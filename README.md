@@ -1,3 +1,6 @@
+[![mt-hub-img]][mt-hub-lnk] 
+
+##  <a href="https://github.com/Banh-Canh/Manga-Tagger">Banh-Canh/Manga-Tagger</a>
 ## Descriptions
 
 This fork doesn't require FMD2. Running MangaTagger.py will make it watch the directory configured in the settings.json.
@@ -15,6 +18,7 @@ input Files still have to be named like this (they can be in their own %MANGA% d
 * Download cover image for each chapter
 * Slightly increased filename parsing capability
 * Docker image available
+* Manga specific configuration
 
 More infos:
 https://github.com/Inpacchi/Manga-Tagger
@@ -111,5 +115,25 @@ Environnement Variables overwrite the settings.json. In docker, it is only possi
 
 Enabling adult result may give wrong manga match. Make sure the input manga title is as accurate as possible if enabling this or it may confuse Anilist's search.
 
+Create a file named "exceptions.json" in your configured "data" folder to force MT to fetch metadata of a specific manga.
+
+In the example below, MT will look for metadata from Anilist by searching for the title "Shi ni Modori, Subete wo Sukuu Tame ni Saikyou He to Itaru @comic" for any file that are named in a way where MT would recognize "Shi ni Modori, Subete wo Sukuu Tame ni Saikyou He to Itaru" as the title.
+
+```json
+{
+  "Shi ni Modori, Subete wo Sukuu Tame ni Saikyou He to Itaru": {
+    "anilist_title": "Shi ni Modori, Subete wo Sukuu Tame ni Saikyou He to Itaru @comic",
+    "format": "MANGA",
+    "adult": false
+  }
+}
+```
+
+In this case, this title isn't accurate enough to search on Anilist and this why is we want MT to use "Shi ni Modori, Subete wo Sukuu Tame ni Saikyou He to Itaru @comic" as the title instead.
+
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
+
+
+[mt-hub-img]: https://img.shields.io/docker/pulls/banhcanh/manga-tagger.svg
+[mt-hub-lnk]: https://hub.docker.com/r/banhcanh/manga-tagger

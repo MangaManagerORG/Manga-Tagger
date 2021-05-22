@@ -26,6 +26,7 @@ class AppSettings:
     download_dir = None
     image_dir = None
     library_dir = None
+    data_dir = None
     is_network_path = None
 
     processed_series = None
@@ -61,6 +62,9 @@ class AppSettings:
 
             if os.getenv("MANGA_TAGGER_DOWNLOAD_DIR") is not None:
                 settings['application']['library']['download_dir'] = os.getenv("MANGA_TAGGER_DOWNLOAD_DIR")
+
+            if os.getenv("MANGA_TAGGER_DATA_DIR") is not None:
+                settings['application']['data_dir'] = os.getenv("MANGA_TAGGER_DATA_DIR")
 
             if os.getenv('TZ') is not None:
                 settings['application']['timezone'] = os.getenv("TZ")
@@ -230,6 +234,14 @@ class AppSettings:
         else:
             cls._log.debug(f'Image cover not enabled')
 
+        # Data Dir
+        if settings['application']['data_dir'] is not None:
+            cls.data_dir = settings['application']['data_dir']
+            cls._log.debug(f'Data Directory: {cls.library_dir}')
+            if not Path(cls.data_dir).exists():
+                cls._log.info(f'Data directory "{AppSettings.library_dir}" does not exist; creating now.')
+                Path(cls.data_dir).mkdir()
+
         # Enable or disable adult result
         if settings['application']['adult_result']:
             cls.adult_result = True
@@ -355,6 +367,7 @@ class AppSettings:
             "application": {
                 "debug_mode": False,
                 "timezone": "Europe/Paris",
+                "data_dir": "data",
                 "image": {
                     "enabled" : True,
                     "image_dir" : "cover"
