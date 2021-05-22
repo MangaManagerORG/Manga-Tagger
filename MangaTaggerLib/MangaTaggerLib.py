@@ -4,6 +4,7 @@ import re
 import requests
 import unicodedata
 import shutil
+import json
 
 from datetime import datetime
 from os import path
@@ -259,7 +260,21 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
     manga_search = None
     db_exists = True
     retries = 0
-    isadult = 'false'
+    isadult = False
+
+    if AppSettings.adult_result:
+        isadult = True
+
+    if Path(f'{AppSettings.data_dir}/exceptions.json').exists():
+        with open(f'{AppSettings.data_dir}/exceptions.json', 'r') as exceptions_json:
+            exceptions = json.load(exceptions_json)
+        if manga_title in exceptions:
+            LOG.info('Manga_title found in exceptions.json, using manga specific configuration...', extra=logging_info)
+            if exceptions[manga_title]['format'] == "MANGA" or exceptions[manga_title]['format'] == "ONE_SHOT":
+                format = exceptions[manga_title]['format']
+            if exceptions[manga_title]['adult'] is True or exceptions[manga_title]['adult'] is False:
+                isadult= exceptions[manga_title]['adult']
+            manga_title = exceptions[manga_title]['anilist_title']
 
     LOG.info(f'Table search value is "{manga_title}"', extra=logging_info)
     while manga_search is None:
@@ -279,7 +294,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
             LOG.info('Manga was not found in the database; resorting to Anilist API.', extra=logging_info)
 
             try:
-                if AppSettings.adult_result: # enable adult result in Anilist
+                if isadult: # enable adult result in Anilist
                     LOG.info('Adult result enabled')
                     manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
                 else:
@@ -289,7 +304,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                 LOG.warning('Manga Tagger has unintentionally breached the API limits on Anilist. Waiting 60s to clear '
                             'all rate limiting limits...')
                 time.sleep(60)
-                if AppSettings.adult_result: # enable adult result in Anilist
+                if isadult: # enable adult result in Anilist
                     LOG.info('Adult result enabled')
                     manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
                 else:
