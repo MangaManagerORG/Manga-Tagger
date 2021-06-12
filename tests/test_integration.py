@@ -36,6 +36,7 @@ class TestMetadata(unittest.TestCase):
         patch3 = patch('MangaTaggerLib.MangaTaggerLib.AppSettings')
         self.MangaTaggerLib_AppSettings = patch3.start()
         self.addCleanup(patch3.stop)
+        self.MangaTaggerLib_AppSettings.data_dir = 'tests/data'
 
     def test_comicinfo_xml_creation_case_1(self):
         title = 'BLEACH'
@@ -133,3 +134,18 @@ class TestMetadata(unittest.TestCase):
         actual_manga_metadata = metadata_tagger("NOWHERE", title, '001', "ONE_SHOT", {})
 
         self.assertNotEqual(expected_manga_metadata.test_value(), actual_manga_metadata.test_value())
+
+    def test_metadata_case_6(self):
+        title = 'Naruto'
+        downloaded_title = 'abc'
+
+        self.MangaTaggerLib_AppSettings.mode_settings = { 'write_comicinfo': False }
+        self.MangaTaggerLib_AppSettings.mode_settings = { 'rename_file': False }
+
+        with open(Path(self.data_dir, title, self.data_file), encoding='utf-8') as data:
+            anilist_details = json.load(data)
+
+        expected_manga_metadata = Metadata(title, {}, anilist_details)
+        actual_manga_metadata = metadata_tagger("NOWHERE", downloaded_title, '001', "MANGA", {})
+
+        self.assertEqual(expected_manga_metadata.test_value(), actual_manga_metadata.test_value())

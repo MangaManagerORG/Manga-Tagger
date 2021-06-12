@@ -56,7 +56,7 @@ RUN \
     py3-psutil py3-watchdog py3-requests py3-tz \
     build-base jpeg-dev zlib-dev python3-dev && \
 
-  pip3 install --no-cache-dir -r requirements.txt && \
+  pip3 install --no-cache-dir -r /app/Manga-Tagger/requirements.txt && \
   mkdir /manga && \
   mkdir /downloads
 
