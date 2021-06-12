@@ -2,9 +2,16 @@ stages:
     - test
     - build
 
+Dockerfile-linter:
+  stage: test
+  image: hadolint/hadolint:v2.4.1-alpine
+  script:
+    # Test Dockerfile Syntax for best practices...
+    - hadolint Dockerfile
+
 MT-filename-parser:
   stage: test
-  image: alpine:latest
+  image: alpine:3.13
   script:
     #"Installing dependencies..."
     - apk add python3 py3-pip py3-numpy py3-multidict py3-yarl py3-psutil py3-watchdog py3-requests py3-tz build-base jpeg-dev zlib-dev python3-dev
@@ -14,7 +21,7 @@ MT-filename-parser:
 
 MT-MetadataXMLConstruct:
   stage: test
-  image: alpine:latest
+  image: alpine:3.13
   script:
     #"Installing dependencies..."
     - apk add python3 py3-pip py3-numpy py3-multidict py3-yarl py3-psutil py3-watchdog py3-requests py3-tz build-base jpeg-dev zlib-dev python3-dev
