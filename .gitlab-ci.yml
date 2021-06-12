@@ -7,7 +7,8 @@ Dockerfile-linter:
   image: hadolint/hadolint:v2.4.1-alpine
   script:
     # Test Dockerfile Syntax for best practices...
-    - hadolint Dockerfile
+    # Ignoring apk add pin version warning because Alpine-Linux Package Management always drop older versions
+    - hadolint --ignore DL3018 Dockerfile
 
 MT-filename-parser:
   stage: test
@@ -15,7 +16,7 @@ MT-filename-parser:
   script:
     #"Installing dependencies..."
     - apk add python3 py3-pip py3-numpy py3-multidict py3-yarl py3-psutil py3-watchdog py3-requests py3-tz build-base jpeg-dev zlib-dev python3-dev
-    - pip3 install pymongo python_json_logger image BeautifulSoup4
+    - pip3 install -r requirements.txt
     #"Testing filename parser and renamer..."
     - python3 -m unittest discover -s tests -p 'test_manga.py'
 
@@ -25,7 +26,7 @@ MT-MetadataXMLConstruct:
   script:
     #"Installing dependencies..."
     - apk add python3 py3-pip py3-numpy py3-multidict py3-yarl py3-psutil py3-watchdog py3-requests py3-tz build-base jpeg-dev zlib-dev python3-dev
-    - pip3 install pymongo python_json_logger image BeautifulSoup4
+    - pip3 install -r requirements.txt
     #"Testing metadata tagger and xml construction"
     - python3 -m unittest discover -s tests -p 'test_integration.py'
 

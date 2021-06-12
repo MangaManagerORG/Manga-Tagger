@@ -52,9 +52,9 @@ RUN \
   echo "Install dependencies" && \
   echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
   apk add --no-cache --update \
-    python3=3.8.10 py3-pip=20.3.4 py3-numpy=1.20.3-r0 py3-multidict=5.1.0-r1 py3-yarl=1.6.3-r1 \
-    py3-psutil=5.8.0-r1 py3-watchdog=2.1.2-r0 py3-requests=2.25.1-r4 py3-tz=2021.1-r1 \
-    build-base=0.4-r1 jpeg-dev=8-r6 zlib-dev=1.2.11-r3 python3-dev=3.5.1-r0 && \
+    python3 py3-pip py3-numpy py3-multidict py3-yarl \
+    py3-psutil py3-watchdog py3-requests py3-tz \
+    build-base jpeg-dev zlib-dev python3-dev && \
 
   pip3 install --no-cache-dir -r requirements.txt && \
   mkdir /manga && \
