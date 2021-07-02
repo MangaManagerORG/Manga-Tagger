@@ -192,7 +192,7 @@ class QueueWorker:
                                      'investigation.')
 
                 cls._queue.task_done()
-            time.sleep(1)
+            time.sleep(5)
 
 class SeriesHandler(PatternMatchingEventHandler):
     _log = None
