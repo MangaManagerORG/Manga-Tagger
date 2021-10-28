@@ -113,6 +113,9 @@ services:
 
 https://github.com/TKVH-Apps/mangatagger
 
+
+## Notes
+
 I recommend using this with my FMD2 docker image: https://hub.docker.com/r/banhcanh/docker-fmd2
 
 Environnement Variables overwrite the settings.json. In docker, it is only possible to configure with environnement variables.
