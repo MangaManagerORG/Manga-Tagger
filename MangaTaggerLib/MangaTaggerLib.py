@@ -491,6 +491,8 @@ def construct_comicinfo_xml(metadata, chapter_number, logging_info):
     number.text = f'{chapter_number}'
 
     summary = SubElement(comicinfo, 'Summary')
+    if metadata.description == "" or metadata.description is None:
+        metadata.description = "<h1>None</h1>"
     soup = BeautifulSoup(metadata.description, "html.parser")
     summary.text = soup.get_text()
 
