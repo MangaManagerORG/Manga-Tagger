@@ -1,0 +1,8 @@
+services:
+  mangatagger-db: # you can use your own mongodb, edit the manga-tagger settings.json accordingly
+    image: mongo
+    container_name: mangatagger-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: manga_tagger
+      MONGO_INITDB_ROOT_PASSWORD: Manga4LYFE
+      MONGO_INITDB_DATABASE: manga_tagger

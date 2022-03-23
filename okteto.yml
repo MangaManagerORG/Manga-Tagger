@@ -1,0 +1,11 @@
+name: manga-tagger
+image: banhcanh/manga-tagger 
+command: bash
+sync:
+- .:/app/Manga-Tagger
+forward:
+- 6080:fmd2:6080
+autocreate: true
+workdir: /app/Manga-Tagger
+persistentVolume:
+  enabled: false
