@@ -1,44 +1,307 @@
 {
   "id": 30012,
   "status": "FINISHED",
+  "volumes": 74,
   "siteUrl": "https://anilist.co/manga/30012",
   "title": {
-	"romaji": "BLEACH",
-	"english": "Bleach",
-	"native": "ブリーチ"
+    "romaji": "BLEACH",
+    "english": "Bleach",
+    "native": "BLEACH"
   },
   "type": "MANGA",
   "genres": [
-	"Action",
-	"Adventure",
-	"Supernatural"
+    "Action",
+    "Adventure",
+    "Supernatural"
   ],
   "startDate": {
-	"day": 7,
-	"month": 8,
-	"year": 2001
+    "day": 7,
+    "month": 8,
+    "year": 2001
   },
   "coverImage": {
-	"extraLarge": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30012-z7U138mUaPdN.png"
+    "extraLarge": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30012-z7U138mUaPdN.png"
   },
   "staff": {
-	"edges": [
-	  {
-		"node": {
-		  "name": {
-			"first": "Tite",
-			"last": "Kubo",
-			"full": "Tite Kubo",
-			"alternative": [
-			  "Taito Kubo",
-			  "Noriaki Kubo (久保宣章)"
-			]
-		  },
-		  "siteUrl": "https://anilist.co/staff/96880"
-		},
-		"role": "Story & Art"
-	  }
-	]
+    "edges": [
+      {
+        "node": {
+          "name": {
+            "first": "Tite",
+            "last": "Kubo",
+            "full": "Tite Kubo",
+            "alternative": [
+              "Taito Kubo",
+              "Noriaki Kubo (\u4e45\u4fdd\u5ba3\u7ae0)"
+            ]
+          },
+          "siteUrl": "https://anilist.co/staff/96880"
+        },
+        "role": "Story & Art"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Ricardo",
+            "last": "Cruz",
+            "full": "Ricardo Cruz",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/104809"
+        },
+        "role": "Translator (Portuguese: vols 1-24)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Drik",
+            "last": "Sada",
+            "full": "Drik Sada",
+            "alternative": [
+              "Adriana Kazue Sada"
+            ]
+          },
+          "siteUrl": "https://anilist.co/staff/220675"
+        },
+        "role": "Translator (Portuguese: vols 25-52, 71-74)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Christine",
+            "last": "Dashiell",
+            "full": "Christine Dashiell",
+            "alternative": [
+              "Christine Schilling"
+            ]
+          },
+          "siteUrl": "https://anilist.co/staff/219441"
+        },
+        "role": "Translator (English: vol 49)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Joe",
+            "last": "Yamazaki",
+            "full": "Joe Yamazaki",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/218469"
+        },
+        "role": "Translator (English)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Mark",
+            "last": "McMurray",
+            "full": "Mark McMurray",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/224874"
+        },
+        "role": "Touch-up Art & Lettering (English: vols 16, 20)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Mark",
+            "last": "McMurray",
+            "full": "Mark McMurray",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/224874"
+        },
+        "role": "Lettering (English: vols: 16, 17, 19, 20, 22, 23, 24)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Evan",
+            "last": "Waldinger",
+            "full": "Evan Waldinger",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/227608"
+        },
+        "role": "Touch-up Art & Lettering (English: vol 21)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Dave",
+            "last": "Lanphear",
+            "full": "Dave Lanphear",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/227606"
+        },
+        "role": "Touch-up Art & Lettering (English: vols 3, 5, 6, 7, 8)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Andy",
+            "last": "Ristaino",
+            "full": "Andy Ristaino",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/227607"
+        },
+        "role": "Touch-up Art & Lettering (English)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Marta",
+            "last": "Gallego",
+            "full": "Marta Gallego",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/225332"
+        },
+        "role": "Translator (Spanish)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Marc",
+            "last": "Bernab\u00e9",
+            "full": "Marc Bernab\u00e9",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/214718"
+        },
+        "role": "Translator (Spanish)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Ver\u00f3nica",
+            "last": "Calafell",
+            "full": "Ver\u00f3nica Calafell",
+            "alternative": [
+              "Ver\u00f3nica Calafell Callejo"
+            ]
+          },
+          "siteUrl": "https://anilist.co/staff/225627"
+        },
+        "role": "Translator (Spanish)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Simona",
+            "last": "Stanzani",
+            "full": "Simona Stanzani",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/225407"
+        },
+        "role": "Translator (Italian)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Rafael",
+            "last": "Morata",
+            "full": "Rafael Morata",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/227609"
+        },
+        "role": "Translator (Spanish)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Daniel",
+            "last": "B\u00fcchner",
+            "full": "Daniel B\u00fcchner",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/227610"
+        },
+        "role": "Translator (German)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Kentarou",
+            "last": "Kurimoto",
+            "full": "Kentarou Kurimoto",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/119236"
+        },
+        "role": "Assistant"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Shou",
+            "last": "Aimoto",
+            "full": "Shou Aimoto",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/98753"
+        },
+        "role": "Assistant"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Hitoshi",
+            "last": "Imoto",
+            "full": "Hitoshi Imoto",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/126703"
+        },
+        "role": "Assistant"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Anne-Sophie",
+            "last": "Thevenon",
+            "full": "Anne-Sophie Thevenon",
+            "alternative": [
+              "Anne-Sophie Th\u00e9venon"
+            ]
+          },
+          "siteUrl": "https://anilist.co/staff/236835"
+        },
+        "role": "Translator (French)"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Shou",
+            "last": "Shiromoto",
+            "full": "Shou Shiromoto",
+            "alternative": []
+          },
+          "siteUrl": "https://anilist.co/staff/249345"
+        },
+        "role": "Assistant"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Tayfun",
+            "last": "Nitahara Haks\u00f6yliyen",
+            "full": "Tayfun Nitahara Haks\u00f6yliyen",
+            "alternative": [
+              "Tayfun Nitahara Haksoyliyen"
+            ]
+          },
+          "siteUrl": "https://anilist.co/staff/275233"
+        },
+        "role": "Translator (Turkish: vols 1-17)"
+      }
+    ]
   },
-  "description": "Ichigo Kurosaki has always been able to see ghosts, but this ability doesn't change his life nearly as much as his close encounter with Rukia Kuchiki, a Soul Reaper and member of the mysterious Soul Society. While fighting a Hollow, an evil spirit that preys on humans who display psychic energy, Rukia attempts to lend Ichigo some of her powers so that he can save his family; but much to her surprise, Ichigo absorbs every last drop of her energy. Now a full-fledged Soul Reaper himself, Ichigo quickly learns that the world he inhabits is one full of dangerous spirits and, along with Rukia— who is slowly regaining her powers— it's Ichigo's job to protect the innocent from Hollows and help the spirits themselves find peace.<br><br>\n(Source: Anime News Network) <br><br>\n<b>20 Included bonus chapters:</b><br>\nVolume 10 - <i>Chapter 88.5: Karakura Super Heroes.</i><br>\nVolume 12 - <i>Chapter 0.8: A Wonderful Error.</i><br>\nVolume 15 - <i>Chapter -17: Prelude for the Straying Stars.</i><br>\nVolume 20 - <i>Chapter -12.5: Blooming Under a Cold Moon.</i><br>\nVolume 23 - <i>Chapter 0.Side-A: The Sand; Chapter 0.Side-B: The Rotator.</i><br>\nVolume 32 - <i>Chapter -16: Death on the Ice Field.</i><br>\nVolume 36 - <i>Chapters -108 to -100: Turn Back the Pendulum (1-9).</i><br>\nVolume 37 - <i>Chapters -99 to -98: Turn Back the Pendulum (10-11); Chapter -97: Let Stop the Pendulum.</i><br>\nVolume 70 - <i>Chapter 520.5: Walk Under Two Letters.</i>"
+  "description": "Ichigo Kurosaki has always been able to see ghosts, but this ability doesn't change his life nearly as much as his close encounter with Rukia Kuchiki, a Soul Reaper and member of the mysterious Soul Society. While fighting a Hollow, an evil spirit that preys on humans who display psychic energy, Rukia attempts to lend Ichigo some of her powers so that he can save his family; but much to her surprise, Ichigo absorbs every last drop of her energy. Now a full-fledged Soul Reaper himself, Ichigo quickly learns that the world he inhabits is one full of dangerous spirits and, along with Rukia\u2014 who is slowly regaining her powers\u2014 it's Ichigo's job to protect the innocent from Hollows and help the spirits themselves find peace.<br><br>\n(Source: Anime News Network)<br><br>\n<i>Note: Chapter count includes the 12-chapter \u201cTurn Back The Pendulum\u201d side story and 8 extra chapters.</i>"
 }

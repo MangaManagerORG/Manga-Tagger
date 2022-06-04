@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -47,7 +48,7 @@ class TestMetadata(unittest.TestCase):
 
         manga_metadata = Metadata(title, {}, anilist_details)
 
-        self.assertTrue(construct_comicinfo_xml(manga_metadata, '001', {}))
+        self.assertTrue(construct_comicinfo_xml(manga_metadata, '001', {}, None))
 
     def test_comicinfo_xml_creation_case_2(self):
         title = 'Naruto'
@@ -59,33 +60,33 @@ class TestMetadata(unittest.TestCase):
 
         manga_metadata = Metadata(title, {}, anilist_details)
 
-        self.assertTrue(construct_comicinfo_xml(manga_metadata, '001', {}))
+        self.assertTrue(construct_comicinfo_xml(manga_metadata, '001', {}, None))
 
     def test_metadata_case_1(self):
         title = 'BLEACH'
 
-        self.MangaTaggerLib_AppSettings.mode_settings = { 'write_comicinfo': False }
-        self.MangaTaggerLib_AppSettings.mode_settings = { 'rename_file': False }
+        self.MangaTaggerLib_AppSettings.mode_settings = {'write_comicinfo': False}
+        self.MangaTaggerLib_AppSettings.mode_settings = {'rename_file': False}
 
         with open(Path(self.data_dir, title, self.data_file), encoding='utf-8') as data:
             anilist_details = json.load(data)
 
         expected_manga_metadata = Metadata(title, {}, anilist_details)
-        actual_manga_metadata = metadata_tagger("NOWHERE", title, '001', "MANGA", {})
+        actual_manga_metadata = metadata_tagger("NOWHERE", title, '001', "MANGA", {}, None)
 
         self.assertEqual(expected_manga_metadata.test_value(), actual_manga_metadata.test_value())
 
     def test_metadata_case_2(self):
         title = 'Naruto'
 
-        self.MangaTaggerLib_AppSettings.mode_settings = { 'write_comicinfo': False }
-        self.MangaTaggerLib_AppSettings.mode_settings = { 'rename_file': False }
+        self.MangaTaggerLib_AppSettings.mode_settings = {'write_comicinfo': False}
+        self.MangaTaggerLib_AppSettings.mode_settings = {'rename_file': False}
 
         with open(Path(self.data_dir, title, self.data_file), encoding='utf-8') as data:
             anilist_details = json.load(data)
 
         expected_manga_metadata = Metadata(title, {}, anilist_details)
-        actual_manga_metadata = metadata_tagger("NOWHERE", title, '001', "MANGA", {})
+        actual_manga_metadata = metadata_tagger("NOWHERE", title, '001', "MANGA", {}, None)
 
         self.assertEqual(expected_manga_metadata.test_value(), actual_manga_metadata.test_value())
 
@@ -93,15 +94,15 @@ class TestMetadata(unittest.TestCase):
         title = '3D Kanojo Real Girl'
         downloaded_title = '3D Kanojo'
 
-        self.MangaTaggerLib_AppSettings.mode_settings = { 'write_comicinfo': False }
-        self.MangaTaggerLib_AppSettings.mode_settings = { 'rename_file': False }
+        self.MangaTaggerLib_AppSettings.mode_settings = {'write_comicinfo': False}
+        self.MangaTaggerLib_AppSettings.mode_settings = {'rename_file': False}
         self.MangaTaggerLib_AppSettings.adult_result = False
 
         with open(Path(self.data_dir, title, self.data_file), encoding='utf-8') as data:
             anilist_details = json.load(data)
 
         expected_manga_metadata = Metadata(title, {}, anilist_details)
-        actual_manga_metadata = metadata_tagger("NOWHERE", downloaded_title, '001', "MANGA", {})
+        actual_manga_metadata = metadata_tagger("NOWHERE", downloaded_title, '001', "MANGA", {}, None)
 
         self.assertEqual(expected_manga_metadata.test_value(), actual_manga_metadata.test_value())
 
@@ -109,27 +110,27 @@ class TestMetadata(unittest.TestCase):
         title = 'Hurejasik'
         downloaded_title = 'Bastard'
 
-        self.MangaTaggerLib_AppSettings.mode_settings = { 'write_comicinfo': False }
-        self.MangaTaggerLib_AppSettings.mode_settings = { 'rename_file': False }
+        self.MangaTaggerLib_AppSettings.mode_settings = {'write_comicinfo': False}
+        self.MangaTaggerLib_AppSettings.mode_settings = {'rename_file': False}
 
         with open(Path(self.data_dir, title, self.data_file), encoding='utf-8') as data:
             anilist_details = json.load(data)
 
         expected_manga_metadata = Metadata(title, {}, anilist_details)
-        actual_manga_metadata = metadata_tagger("NOWHERE", downloaded_title, '001', "MANGA", {})
+        actual_manga_metadata = metadata_tagger("NOWHERE", downloaded_title, '001', "MANGA", {}, None)
 
         self.assertEqual(expected_manga_metadata.test_value(), actual_manga_metadata.test_value())
 
     def test_metadata_case_5(self):
         title = 'Naruto'
 
-        self.MangaTaggerLib_AppSettings.mode_settings = { 'write_comicinfo': False }
-        self.MangaTaggerLib_AppSettings.mode_settings = { 'rename_file': False }
+        self.MangaTaggerLib_AppSettings.mode_settings = {'write_comicinfo': False}
+        self.MangaTaggerLib_AppSettings.mode_settings = {'rename_file': False}
 
         with open(Path(self.data_dir, title, self.data_file), encoding='utf-8') as data:
             anilist_details = json.load(data)
 
         expected_manga_metadata = Metadata(title, {}, anilist_details)
-        actual_manga_metadata = metadata_tagger("NOWHERE", title, '001', "ONE_SHOT", {})
+        actual_manga_metadata = metadata_tagger("NOWHERE", title, '001', "ONE_SHOT", {}, None)
 
         self.assertNotEqual(expected_manga_metadata.test_value(), actual_manga_metadata.test_value())
