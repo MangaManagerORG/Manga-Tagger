@@ -78,6 +78,7 @@ class AniList:
           Media (id: $series_id, type: MANGA, format: $format) {
             id
             status
+            volumes
             siteUrl
             title {
               romaji
