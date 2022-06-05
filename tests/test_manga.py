@@ -15,7 +15,7 @@ class FilenameParserTestCase(unittest.TestCase):
        filename = "Naruto -.- Chap 0.cbz"
        directory_name = "Naruto"
        logging_info = { 'event_id': 0, 'manga_title': directory_name, "original_filename": filename }
-       expected_result = ("Naruto", "000", "MANGA")
+       expected_result = ("Naruto", "000", "MANGA",None)
        result = filename_parser(filename, logging_info)
        self.assertEqual(expected_result, result)
 
@@ -23,7 +23,7 @@ class FilenameParserTestCase(unittest.TestCase):
        filename = "Naruto -.- Chap 15.5.cbz"
        directory_name = "Naruto"
        logging_info = { 'event_id': 0, 'manga_title': directory_name, "original_filename": filename }
-       expected_result = ("Naruto", "015.5", "MANGA")
+       expected_result = ("Naruto", "015.5", "MANGA",None)
        result = filename_parser(filename, logging_info)
        self.assertEqual(expected_result, result)
 
@@ -32,7 +32,7 @@ class FilenameParserTestCase(unittest.TestCase):
        filename = "Naruto -.- Oneshot.cbz"
        directory_name = "Naruto"
        logging_info = { 'event_id': 0, 'manga_title': directory_name, "original_filename": filename }
-       expected_result = ("Naruto", "000", "ONE_SHOT")
+       expected_result = ("Naruto", "000", "ONE_SHOT",None)
        result = filename_parser(filename, logging_info)
        self.assertEqual(expected_result, result)
 
@@ -41,7 +41,7 @@ class FilenameParserTestCase(unittest.TestCase):
        filename = "Berserk -.- Prologue 5.cbz"
        directory_name = "Berserk"
        logging_info = { 'event_id': 0, 'manga_title': directory_name, "original_filename": filename }
-       expected_result = ("Berserk", "000.5", "MANGA")
+       expected_result = ("Berserk", "000.5", "MANGA",None)
        result = filename_parser(filename, logging_info)
        self.assertEqual(expected_result, result)
 
@@ -50,10 +50,18 @@ class FilenameParserTestCase(unittest.TestCase):
        filename = "One Piece -.- Volume 50 Episode 156 A Chapter Name (15).cbz"
        directory_name = "Naruto"
        logging_info = { 'event_id': 0, 'manga_title': directory_name, "original_filename": filename }
-       expected_result = ("One Piece", "156", "MANGA")
+       expected_result = ("One Piece", "156", "MANGA","50")
        result = filename_parser(filename, logging_info)
        self.assertEqual(expected_result, result)
 
+   def test_filename_parser_ignore_fluff_2(self):
+       ## Ignore Volume, chapter name and (part)
+       filename = "Kuma Kuma Kuma Bear -.- Ch. 064 - Kuma-san and the Shop's Opening Day 2.cbz"
+       directory_name = "Kuma Kuma Kuma Bear"
+       logging_info = {'event_id': 0, 'manga_title': directory_name, "original_filename": filename}
+       expected_result = ("Kuma Kuma Kuma Bear", "064", "MANGA", None)
+       result = filename_parser(filename, logging_info)
+       self.assertEqual(expected_result, result)
 class TestMangaRenameAction(unittest.TestCase):
     download_dir = Path('tests/downloads')
     library_dir = Path('tests/library')

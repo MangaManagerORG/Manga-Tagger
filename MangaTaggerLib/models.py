@@ -45,6 +45,11 @@ class Metadata:
             self.series_title_jap = anilist_details['title']['native']
 
         self.status = anilist_details['status']
+        if anilist_details.get('volumes'):
+            self.volumes = anilist_details.get('volumes')
+        else:
+            self.volumes = None
+
         self.type = anilist_details['type']
         self.description = anilist_details['description']
         self.anilist_url = anilist_details['siteUrl']
@@ -64,6 +69,7 @@ class Metadata:
         self.series_title_eng = details['series_title_eng']
         self.series_title_jap = details['series_title_jap']
         self.status = details['status']
+        self.volumes = details.get("volumes")
         self.type = details['type']
         self.description = details['description']
         self.anilist_url = details['anilist_url']
@@ -160,6 +166,7 @@ class Metadata:
             'series_title_eng': self.series_title_eng,
             'series_title_jap': self.series_title_jap,
             'status': self.status,
+            'volumes':self.volumes,
 #            'mal_url': self.mal_url,
             'anilist_url': self.anilist_url,
             'publish_date': self.publish_date,

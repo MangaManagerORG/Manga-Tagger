@@ -1,60 +1,61 @@
 {
   "id": 86964,
   "status": "FINISHED",
+  "volumes": 5,
   "siteUrl": "https://anilist.co/manga/86964",
   "title": {
-	"romaji": "Hurejasik",
-	"english": "Bastard",
-	"native": "후레자식"
+    "romaji": "Hurejasik",
+    "english": "Bastard",
+    "native": "후레자식"
   },
   "type": "MANGA",
   "genres": [
-	"Drama",
-	"Horror",
-	"Mystery",
-	"Psychological",
-	"Romance",
-	"Thriller"
+    "Drama",
+    "Horror",
+    "Mystery",
+    "Psychological",
+    "Romance",
+    "Thriller"
   ],
   "startDate": {
-	"day": 4,
-	"month": 7,
-	"year": 2014
+    "day": 4,
+    "month": 7,
+    "year": 2014
   },
   "coverImage": {
-	"extraLarge": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/nx86964-r7S3IbJNr4SD.jpg"
+    "extraLarge": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/nx86964-r7S3IbJNr4SD.jpg"
   },
   "staff": {
-	"edges": [
-	  {
-		"node": {
-		  "name": {
-			"first": "Youngchan",
-			"last": "Hwang",
-			"full": "Youngchan Hwang",
-			"alternative": [
-			  ""
-			]
-		  },
-		  "siteUrl": "https://anilist.co/staff/119717"
-		},
-		"role": "Art"
-	  },
-	  {
-		"node": {
-		  "name": {
-			"first": "Carnby",
-			"last": "Kim",
-			"full": "Carnby Kim",
-			"alternative": [
-			  "김칸비"
-			]
-		  },
-		  "siteUrl": "https://anilist.co/staff/119718"
-		},
-		"role": "Story"
-	  }
-	]
+    "edges": [
+      {
+        "node": {
+          "name": {
+            "first": "Yeong-chan",
+            "last": "Hwang",
+            "full": "Yeong-chan Hwang",
+            "alternative": [
+              ""
+            ]
+          },
+          "siteUrl": "https://anilist.co/staff/119717"
+        },
+        "role": "Art"
+      },
+      {
+        "node": {
+          "name": {
+            "first": "Carnby",
+            "last": "Kim",
+            "full": "Carnby Kim",
+            "alternative": [
+              "김칸비"
+            ]
+          },
+          "siteUrl": "https://anilist.co/staff/119718"
+        },
+        "role": "Story"
+      }
+    ]
   },
   "description": "There is nowhere that Seon Jin can find solace. At school, he is ruthlessly bullied due to his unsettlingly quiet nature and weak appearance. However, this is not the source of Jin's insurmountable terror: the thing that he fears more than anything else is his own father.<br><br>\nTo most, Jin's father is a successful businessman, good samaritan, and doting parent. But that is merely a facade; in truth, he is a deranged serial killer—and Jin is his unwilling accomplice. For years, they have been carrying out this ruse with the police being none the wiser. However, when his father takes an interest in the pretty transfer student Yoon Kyun, Jin must make a decision—be the coward who sends her to the gallows like all the rest, or be the bastard of a son who defies his wicked parent.<br><br>\n(Source: MAL Rewrite)<br><br>\n<i>Note: Includes the prologue.</i>"
 }
