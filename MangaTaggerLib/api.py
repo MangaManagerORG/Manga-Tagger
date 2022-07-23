@@ -24,8 +24,10 @@ class AniList:
         cls._log.debug(f'Query: {query}')
         cls._log.debug(f'Variables: {variables}')
         cls._log.debug(f'Response JSON: {response.json()}')
-
-        return response.json()['data']['Media']
+        try:
+            return response.json()['data']['Media']
+        except TypeError:
+            return None
 
     @classmethod
     def search_for_manga_title_by_manga_title(cls, manga_title, format, logging_info):
