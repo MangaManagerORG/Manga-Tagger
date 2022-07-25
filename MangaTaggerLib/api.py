@@ -15,6 +15,8 @@ class AniList:
     def _post(cls, query, variables, logging_info):
         try:
             response = requests.post('https://graphql.anilist.co', json={'query': query, 'variables': variables})
+            if response.status_code == 429:  # Anilist rate-limit code
+                raise AniListRateLimit()
         except Exception as e:
             cls._log.exception(e, extra=logging_info)
             cls._log.warning('Manga Tagger is unfamiliar with this error. Please log an issue for investigation.',
@@ -122,3 +124,9 @@ class AniList:
         }
         
         return cls._post(query, variables, logging_info)
+
+
+class AniListRateLimit(Exception):
+    """
+    Exception raised when AniList rate-limit is breached.
+    """
