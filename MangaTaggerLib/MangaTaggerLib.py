@@ -17,7 +17,7 @@ from zipfile import ZipFile
 from bs4 import BeautifulSoup
 
 from MangaTaggerLib._version import __version__
-from MangaTaggerLib.api import AniList
+from MangaTaggerLib.api import AniList, AniListRateLimit
 from MangaTaggerLib.database import MetadataTable, ProcFilesTable, ProcSeriesTable
 from MangaTaggerLib.errors import FileAlreadyProcessedError, FileUpdateNotRequiredError, UnparsableFilenameError, \
     MangaNotFoundError, MangaMatchedException
@@ -315,7 +315,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                                                                                             logging_info)
                 else:
                     manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
-            except (APIException, ConnectionError) as e:
+            except AniListRateLimit as e:
                 LOG.warning(e, extra=logging_info)
                 LOG.warning('Manga Tagger has unintentionally breached the API limits on Anilist. Waiting 60s to clear '
                             'all rate limiting limits...')
