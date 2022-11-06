@@ -32,6 +32,28 @@ class AniList:
             return None
 
     @classmethod
+    def search_for_manga_title_by_id(cls, manga_id, logging_info):
+        query = '''
+        query search_for_manga_title_by_id ($manga_id: Int) {
+          Media (id: $manga_id, type: MANGA) {
+            id
+            title {
+              romaji
+              english
+              native
+            }
+            synonyms
+          }
+        }
+        '''
+
+        variables = {
+            'manga_id': manga_id,
+        }
+
+        return cls._post(query, variables, logging_info)
+
+    @classmethod
     def search_for_manga_title_by_manga_title(cls, manga_title, format, logging_info):
         query = '''
         query search_manga_by_manga_title ($manga_title: String, $format: MediaFormat) {
@@ -42,6 +64,7 @@ class AniList:
               english
               native
             }
+            synonyms
           }
         }
         '''
@@ -64,6 +87,7 @@ class AniList:
               english
               native
             }
+            synonyms
           }
         }
         '''
@@ -91,6 +115,7 @@ class AniList:
             }
             type
             genres
+            synonyms
             startDate {
               day
               month

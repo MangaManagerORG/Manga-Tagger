@@ -93,6 +93,7 @@ def filename_parser(filename, logging_info):
 
     manga_title: str = filename[0]
     chapter_title: str = path.splitext(filename[1].lower())[0]
+    manga_title = manga_title.strip()
     LOG.debug(f'manga_title: {manga_title}')
     LOG.debug(f'chapter: {chapter_title}')
 
@@ -276,6 +277,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
     db_exists = True
     retries = 0
     isadult = False
+    anilist_id = None
 
     if AppSettings.adult_result:
         isadult = True
@@ -289,30 +291,30 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                 format = exceptions[manga_title]['format']
             if exceptions[manga_title]['adult'] is True or exceptions[manga_title]['adult'] is False:
                 isadult = exceptions[manga_title]['adult']
-            manga_title = exceptions[manga_title]['anilist_title']
+            if "anilist_id" in exceptions[manga_title]:
+                anilist_id = exceptions[manga_title]['anilist_id']
+            if "anilist_title" in exceptions[manga_title]:
+                manga_title = exceptions[manga_title]['anilist_title']
 
     LOG.info(f'Table search value is "{manga_title}"', extra=logging_info)
     while manga_search is None:
         if retries == 0:
-            LOG.info('Searching manga_metadata for manga title by search value...', extra=logging_info)
-            manga_search = MetadataTable.search_by_search_value(manga_title)
+            if anilist_id is not None:
+                LOG.info('Searching manga_metadata for anilist id.', extra=logging_info)
+                manga_search = MetadataTable.search_by_search_id(anilist_id)
+            else:
+                LOG.info('Searching manga_metadata for manga title by search value...', extra=logging_info)
+                manga_search = MetadataTable.search_by_search_value(manga_title)
             retries = 1
-        elif retries == 1:
-            LOG.info('Searching manga_metadata for regular manga title...', extra=logging_info)
-            manga_search = MetadataTable.search_by_series_title(manga_title)
-            retries = 2
-        elif retries == 2:
-            LOG.info('Searching manga_metadata for English manga title...', extra=logging_info)
-            manga_search = MetadataTable.search_by_series_title_eng(manga_title)
-            retries = 3
         else:  # The manga is not in the database, so ping the API and create the database
             LOG.info('Manga was not found in the database; resorting to Anilist API.', extra=logging_info)
-
             try:
-                if isadult:  # enable adult result in Anilist
+                if anilist_id:
+                    LOG.info('Searching based on id given in exception file. ')
+                    manga_search = AniList.search_for_manga_title_by_id(anilist_id, logging_info)
+                elif isadult:  # enable adult result in Anilist
                     LOG.info('Adult result enabled')
-                    manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format,
-                                                                                            logging_info)
+                    manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
                 else:
                     manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
             except AniListRateLimit as e:
@@ -320,10 +322,12 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                 LOG.warning('Manga Tagger has unintentionally breached the API limits on Anilist. Waiting 60s to clear '
                             'all rate limiting limits...')
                 time.sleep(60)
-                if isadult:  # enable adult result in Anilist
+                if anilist_id:
+                    LOG.info('Searching based on id given in exception file: ')
+                    manga_search = AniList.search_for_manga_title_by_id(anilist_id, logging_info)
+                elif isadult:  # enable adult result in Anilist
                     LOG.info('Adult result enabled')
-                    manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format,
-                                                                                            logging_info)
+                    manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
                 else:
                     manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
             if manga_search is None:
@@ -380,11 +384,19 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                      extra=logging_info)
             ProcSeriesTable.processed_series.add(manga_title)
 
-        if AppSettings.image and not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
-            LOG.info(f'Image directory configured but cover not found. Send request to Anilist for necessary data.',
-                     extra=logging_info)
-            manga_id = MetadataTable.search_id_by_search_value(series_title)
-            anilist_details = AniList.search_staff_by_mal_id(manga_id, logging_info)
+        if AppSettings.image:
+            if not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
+                LOG.info(f'Image directory configured but cover not found. Send request to Anilist for necessary data.',extra=logging_info)
+                manga_id = MetadataTable.search_by_series_title(series_title)['_id']
+                anilist_details = AniList.search_details_by_series_id(manga_id, format, logging_info)
+                LOG.info('Downloading series cover image...', extra=logging_info)
+                download_cover_image(series_title, anilist_details['coverImage']['extraLarge'])
+            else:
+                LOG.info('Series cover image already exist, not downloading.', extra=logging_info)
+        else:
+            LOG.info('Image flag not set, not downloading series cover image.', extra=logging_info)
+
+
 
         manga_metadata = Metadata(series_title, logging_info, details=manga_search)
         logging_info['metadata'] = manga_metadata.__dict__
@@ -469,18 +481,16 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
 
     if AppSettings.mode_settings is None or ('write_comicinfo' in AppSettings.mode_settings.keys()
                                              and AppSettings.mode_settings['write_comicinfo']):
-
         if AppSettings.image:
             if not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
-                LOG.info('Downloading series cover image...', extra=logging_info)
+                LOG.info(f'Image directory configured but cover not found. Downloading series cover image...', extra=logging_info)
                 download_cover_image(series_title, anilist_details['coverImage']['extraLarge'])
             else:
-                LOG.info('Serie cover image already exist, not downloading.', extra=logging_info)
-        else:
-            LOG.info('Image Directory not set, not downloading series cover image.', extra=logging_info)
-
+                LOG.info('Series cover image already exist, not downloading.', extra=logging_info)
         comicinfo_xml = construct_comicinfo_xml(manga_metadata, manga_chapter_number, logging_info, volume)
         reconstruct_manga_chapter(series_title, comicinfo_xml, new_file_path, logging_info)
+        if AppSettings.image and (not AppSettings.image_first or (AppSettings.image_first and int(float(manga_chapter_number))==1)):
+            add_cover_to_manga_chapter(series_title, new_file_path, logging_info)
 
     LOG.info(f'Processing on "{new_file_path}" has finished.', extra=logging_info)
     return manga_metadata
@@ -590,17 +600,25 @@ def construct_comicinfo_xml(metadata: Metadata, chapter_number, logging_info, vo
 def reconstruct_manga_chapter(manga_title, comicinfo_xml, manga_file_path, logging_info):
     try:
         with ZipFile(manga_file_path, 'a') as zipfile:
-            if AppSettings.image and Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
-                zipfile.write(f'{AppSettings.image_dir}/{manga_title}_cover.jpg', '000_cover.jpg')
             zipfile.writestr('ComicInfo.xml', comicinfo_xml)
     except Exception as e:
         LOG.exception(e, extra=logging_info)
         LOG.warning('Manga Tagger is unfamiliar with this error. Please log an issue for investigation.',
                     extra=logging_info)
         return
-
     LOG.info(f'ComicInfo.xml has been created and appended to "{manga_file_path}".', extra=logging_info)
 
+def add_cover_to_manga_chapter(manga_title, manga_file_path, logging_info):
+    try:
+        with ZipFile(manga_file_path, 'a') as zipfile:
+            if AppSettings.image and Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
+                zipfile.write(f'{AppSettings.image_dir}/{manga_title}_cover.jpg', '000_cover.jpg')
+    except Exception as e:
+        LOG.exception(e, extra=logging_info)
+        LOG.warning('Manga Tagger is unfamiliar with this error. Please log an issue for investigation.',
+                    extra=logging_info)
+        return
+    LOG.info(f'Cover Image has been added to "{manga_file_path}".', extra=logging_info)
 
 def download_cover_image(manga_title, image_url):
     image = requests.get(image_url)
