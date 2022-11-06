@@ -93,13 +93,15 @@ class Metadata:
 
     def _parse_genres(self, genres, logging_info):
         Metadata._log.info('Parsing genres...', extra=logging_info)
-        Metadata._log.debug(f'Genre found: {", ".join(genres)}')
-        self.genres.extend(genres)
+        for genre in genres:
+            Metadata._log.debug(f'Genre found: {genre}')
+            self.genres.append(genre.strip())
 
     def _parse_synonyms(self, synonyms, logging_info):
         Metadata._log.info('Parsing Synonyms...', extra=logging_info)
-        Metadata._log.debug(f'Synonyms found: {", ".join(synonyms)}')
-        self.synonyms.extend(synonyms)
+        for synonym in synonyms:
+            Metadata._log.debug(f'Synonym found: {synonym}')
+            self.synonyms.append(synonym.strip())
 
     def _parse_staff(self, anilist_staff, logging_info):
         Metadata._log.info('Parsing staff roles...', extra=logging_info)
