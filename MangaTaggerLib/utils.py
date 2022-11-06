@@ -22,6 +22,7 @@ class AppSettings:
     timezone = None
     version = None
     image = False
+    image_first = False
     adult_result = False
     download_dir = None
     image_dir = None
@@ -104,6 +105,9 @@ class AppSettings:
             if os.getenv("MANGA_TAGGER_IMAGE_COVER") is not None:
                 if os.getenv("MANGA_TAGGER_IMAGE_COVER").lower() == 'true':
                     settings['application']['image']['enabled'] = True
+                elif os.getenv("MANGA_TAGGER_IMAGE_COVER").lower() == 'first':
+                    settings['application']['image']['enabled'] = True
+                    settings['application']['image']['first'] = True
                 elif os.getenv("MANGA_TAGGER_IMAGE_COVER").lower() == 'false':
                     settings['application']['image']['enabled'] = False
             if os.getenv("MANGA_TAGGER_IMAGE_DIR") is not None:
@@ -220,6 +224,8 @@ class AppSettings:
         # Image Directory
         if settings['application']['image']['enabled']:
             cls.image = True
+            if settings['application']['image']['first']:
+                cls.image_first = True
             if settings['application']['image']['image_dir'] is not None:
                 if settings['application']['image']['image_dir'] is not None:
                     cls.image_dir = settings['application']['image']['image_dir']

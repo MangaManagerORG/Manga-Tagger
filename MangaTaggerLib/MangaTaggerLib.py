@@ -384,11 +384,19 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                      extra=logging_info)
             ProcSeriesTable.processed_series.add(manga_title)
 
-        if AppSettings.image and not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
-            LOG.info(f'Image directory configured but cover not found. Send request to Anilist for necessary data.',
-                     extra=logging_info)
-            manga_id = MetadataTable.search_id_by_search_value(series_title)
-            anilist_details = AniList.search_staff_by_mal_id(manga_id, logging_info)
+        if AppSettings.image:
+            if not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
+                LOG.info(f'Image directory configured but cover not found. Send request to Anilist for necessary data.',extra=logging_info)
+                manga_id = MetadataTable.search_by_series_title(series_title)['_id']
+                anilist_details = AniList.search_details_by_series_id(manga_id, format, logging_info)
+                LOG.info('Downloading series cover image...', extra=logging_info)
+                download_cover_image(series_title, anilist_details['coverImage']['extraLarge'])
+            else:
+                LOG.info('Series cover image already exist, not downloading.', extra=logging_info)
+        else:
+            LOG.info('Image flag not set, not downloading series cover image.', extra=logging_info)
+
+
 
         manga_metadata = Metadata(series_title, logging_info, details=manga_search)
         logging_info['metadata'] = manga_metadata.__dict__
@@ -473,18 +481,16 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
 
     if AppSettings.mode_settings is None or ('write_comicinfo' in AppSettings.mode_settings.keys()
                                              and AppSettings.mode_settings['write_comicinfo']):
-
         if AppSettings.image:
             if not Path(f'{AppSettings.image_dir}/{series_title}_cover.jpg').exists():
-                LOG.info('Downloading series cover image...', extra=logging_info)
+                LOG.info(f'Image directory configured but cover not found. Downloading series cover image...', extra=logging_info)
                 download_cover_image(series_title, anilist_details['coverImage']['extraLarge'])
             else:
-                LOG.info('Serie cover image already exist, not downloading.', extra=logging_info)
-        else:
-            LOG.info('Image Directory not set, not downloading series cover image.', extra=logging_info)
-
+                LOG.info('Series cover image already exist, not downloading.', extra=logging_info)
         comicinfo_xml = construct_comicinfo_xml(manga_metadata, manga_chapter_number, logging_info, volume)
         reconstruct_manga_chapter(series_title, comicinfo_xml, new_file_path, logging_info)
+        if AppSettings.image and (not AppSettings.image_first or (AppSettings.image_first and int(float(manga_chapter_number))==1)):
+            add_cover_to_manga_chapter(series_title, new_file_path, logging_info)
 
     LOG.info(f'Processing on "{new_file_path}" has finished.', extra=logging_info)
     return manga_metadata
@@ -594,17 +600,25 @@ def construct_comicinfo_xml(metadata: Metadata, chapter_number, logging_info, vo
 def reconstruct_manga_chapter(manga_title, comicinfo_xml, manga_file_path, logging_info):
     try:
         with ZipFile(manga_file_path, 'a') as zipfile:
-            if AppSettings.image and Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
-                zipfile.write(f'{AppSettings.image_dir}/{manga_title}_cover.jpg', '000_cover.jpg')
             zipfile.writestr('ComicInfo.xml', comicinfo_xml)
     except Exception as e:
         LOG.exception(e, extra=logging_info)
         LOG.warning('Manga Tagger is unfamiliar with this error. Please log an issue for investigation.',
                     extra=logging_info)
         return
-
     LOG.info(f'ComicInfo.xml has been created and appended to "{manga_file_path}".', extra=logging_info)
 
+def add_cover_to_manga_chapter(manga_title, manga_file_path, logging_info):
+    try:
+        with ZipFile(manga_file_path, 'a') as zipfile:
+            if AppSettings.image and Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
+                zipfile.write(f'{AppSettings.image_dir}/{manga_title}_cover.jpg', '000_cover.jpg')
+    except Exception as e:
+        LOG.exception(e, extra=logging_info)
+        LOG.warning('Manga Tagger is unfamiliar with this error. Please log an issue for investigation.',
+                    extra=logging_info)
+        return
+    LOG.info(f'Cover Image has been added to "{manga_file_path}".', extra=logging_info)
 
 def download_cover_image(manga_title, image_url):
     image = requests.get(image_url)
