@@ -154,27 +154,6 @@ class MetadataTable(Database):
             {'synonyms': manga_title}
         ]})
 
-    # @classmethod
-    # def search_by_series_title_eng(cls, manga_title):
-    #     cls._log.debug(
-    #         f'Searching manga_metadata cls by key "series_title_eng" using value "{manga_title}"')
-    #     return cls._database.find_one({
-    #         'series_title_eng': manga_title
-    #     })
-    #
-    # @classmethod
-    # def search_by_series_title(cls, manga_title):
-    #     cls._log.debug(f'Searching manga_metadata cls by key "series_title" using value "{manga_title}"')
-    #     return cls._database.find_one({
-    #         'series_title': manga_title
-    #     })
-    #
-    # @classmethod
-    # def search_by_series_synonym(cls, manga_title):
-    #     cls._log.debug(f'Searching manga_metadata cls by key "synonyms" using value "{manga_title}"')
-    #     return cls._database.find_one({
-    #         'synonyms': manga_title
-    #     })
 
     @classmethod
     def search_id_by_search_value(cls, manga_title):
