@@ -93,6 +93,7 @@ def filename_parser(filename, logging_info):
 
     manga_title: str = filename[0]
     chapter_title: str = path.splitext(filename[1].lower())[0]
+    manga_title = manga_title.strip()
     LOG.debug(f'manga_title: {manga_title}')
     LOG.debug(f'chapter: {chapter_title}')
 
@@ -276,6 +277,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
     db_exists = True
     retries = 0
     isadult = False
+    anilist_id = None
 
     if AppSettings.adult_result:
         isadult = True
@@ -289,30 +291,30 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                 format = exceptions[manga_title]['format']
             if exceptions[manga_title]['adult'] is True or exceptions[manga_title]['adult'] is False:
                 isadult = exceptions[manga_title]['adult']
-            manga_title = exceptions[manga_title]['anilist_title']
+            if "anilist_id" in exceptions[manga_title]:
+                anilist_id = exceptions[manga_title]['anilist_id']
+            if "anilist_title" in exceptions[manga_title]:
+                manga_title = exceptions[manga_title]['anilist_title']
 
     LOG.info(f'Table search value is "{manga_title}"', extra=logging_info)
     while manga_search is None:
         if retries == 0:
-            LOG.info('Searching manga_metadata for manga title by search value...', extra=logging_info)
-            manga_search = MetadataTable.search_by_search_value(manga_title)
+            if anilist_id is not None:
+                LOG.info('Searching manga_metadata for anilist id.', extra=logging_info)
+                manga_search = MetadataTable.search_by_search_id(anilist_id)
+            else:
+                LOG.info('Searching manga_metadata for manga title by search value...', extra=logging_info)
+                manga_search = MetadataTable.search_by_search_value(manga_title)
             retries = 1
-        elif retries == 1:
-            LOG.info('Searching manga_metadata for regular manga title...', extra=logging_info)
-            manga_search = MetadataTable.search_by_series_title(manga_title)
-            retries = 2
-        elif retries == 2:
-            LOG.info('Searching manga_metadata for English manga title...', extra=logging_info)
-            manga_search = MetadataTable.search_by_series_title_eng(manga_title)
-            retries = 3
         else:  # The manga is not in the database, so ping the API and create the database
             LOG.info('Manga was not found in the database; resorting to Anilist API.', extra=logging_info)
-
             try:
-                if isadult:  # enable adult result in Anilist
+                if anilist_id:
+                    LOG.info('Searching based on id given in exception file. ')
+                    manga_search = AniList.search_for_manga_title_by_id(anilist_id, logging_info)
+                elif isadult:  # enable adult result in Anilist
                     LOG.info('Adult result enabled')
-                    manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format,
-                                                                                            logging_info)
+                    manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
                 else:
                     manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
             except AniListRateLimit as e:
@@ -320,10 +322,12 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                 LOG.warning('Manga Tagger has unintentionally breached the API limits on Anilist. Waiting 60s to clear '
                             'all rate limiting limits...')
                 time.sleep(60)
-                if isadult:  # enable adult result in Anilist
+                if anilist_id:
+                    LOG.info('Searching based on id given in exception file: ')
+                    manga_search = AniList.search_for_manga_title_by_id(anilist_id, logging_info)
+                elif isadult:  # enable adult result in Anilist
                     LOG.info('Adult result enabled')
-                    manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format,
-                                                                                            logging_info)
+                    manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
                 else:
                     manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
             if manga_search is None:

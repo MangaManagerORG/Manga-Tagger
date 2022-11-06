@@ -137,27 +137,23 @@ class MetadataTable(Database):
         cls._log.debug(f'{cls.__name__} class has been initialized')
 
     @classmethod
+    def search_by_search_id(cls, manga_id):
+        cls._log.debug(f'Searching manga_metadata cls by key "_id" using value "{manga_id}"')
+        return cls._database.find_one({
+            '_id': manga_id
+        })
+
+    @classmethod
     def search_by_search_value(cls, manga_title):
         cls._log.debug(f'Searching manga_metadata cls by key "search_value" using value "{manga_title}"')
-        return cls._database.find_one({
-            'search_value': manga_title
-        })
+        return cls._database.find_one({'$or': [
+            {'search_value': manga_title},
+            {'series_title': manga_title},
+            {'series_title_eng': manga_title},
+            {'series_title_jap': manga_title},
+            {'synonyms': manga_title}
+        ]})
 
-    @classmethod
-    def search_by_series_title_eng(cls, manga_title):
-        cls._log.debug(
-            f'Searching manga_metadata cls by key "series_title_eng" using value "{manga_title}"')
-        return cls._database.find_one({
-            'series_title_eng': manga_title
-        })
-
-    @classmethod
-    def search_by_series_title(cls, manga_title):
-        cls._log.debug(f'Searching manga_metadata cls by key "series_title" using value "{manga_title}"')
-        return cls._database.find_one({
-            'series_title': manga_title
-        })
-    
     @classmethod
     def search_id_by_search_value(cls, manga_title):
         cls._log.debug(f'Searching "series_id" using value "{manga_title}"')
@@ -167,23 +163,14 @@ class MetadataTable(Database):
     @classmethod
     def search_series_title(cls, manga_title):
         cls._log.debug(f'Searching "series_title" using value "{manga_title}"')
-        cursor = None
-        retries = 0
-        while cursor == 'None' or cursor is None:
-            if retries == 0:
-                cursor = cls._database.find_one({"search_value": manga_title}, {"series_title": 1})
-                retries = 1
-            elif retries == 1:
-                cursor = cls._database.find_one({"series_title": manga_title}, {"series_title": 1})
-                retries = 2
-            elif retries == 2:
-                cursor = cls._database.find_one({"series_title_eng": manga_title}, {"series_title": 1})
-                retries = 3
-            elif retries == 3:
-                cursor = cls._database.find_one({"series_title_jap": manga_title}, {"series_title": 1})
-            else:
-                cls._log.info(f'Can not find series_title !!')
-        return cursor['series_title']
+        return cls._database.find_one({"$or": [
+            {'search_value': manga_title},
+            {'series_title': manga_title},
+            {'series_title_eng': manga_title},
+            {'series_title_jap': manga_title},
+            {'synonyms': manga_title}
+        ]}, {'series_title': 1})['series_title']
+
 
 class ProcFilesTable(Database):
     @classmethod
