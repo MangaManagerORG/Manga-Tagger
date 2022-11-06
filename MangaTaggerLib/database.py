@@ -192,26 +192,6 @@ class MetadataTable(Database):
             {'series_title_jap': manga_title},
             {'synonyms': manga_title}
         ]}, {'series_title': 1})['series_title']
-        # cursor = None
-        # retries = 0
-        # while cursor == 'None' or cursor is None:
-        #     if retries == 0:
-        #         cursor = cls._database.find_one({"search_value": manga_title}, {"series_title": 1})
-        #         retries = 1
-        #     elif retries == 1:
-        #         cursor = cls._database.find_one({"series_title": manga_title}, {"series_title": 1})
-        #         retries = 2
-        #     elif retries == 2:
-        #         cursor = cls._database.find_one({"series_title_eng": manga_title}, {"series_title": 1})
-        #         retries = 3
-        #     elif retries == 3:
-        #         cursor = cls._database.find_one({"series_title_jap": manga_title}, {"series_title": 1})
-        #         retries = 4
-        #     elif retries == 4:
-        #         cursor = cls._database.find_one({"synonyms": manga_title}, {"series_title": 1})
-        #     else:
-        #         cls._log.info(f'Can not find series_title !!')
-        #return cursor['series_title']
 
 class ProcFilesTable(Database):
     @classmethod
