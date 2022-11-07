@@ -395,9 +395,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
         else:
             LOG.debug('Image flag not set, not downloading series cover image.', extra=logging_info)
 
-
-
-        manga_metadata = Metadata(series_title, logging_info, details=manga_search)
+        manga_metadata = Metadata(manga_title, logging_info, details=manga_search)
         logging_info['metadata'] = manga_metadata.__dict__
     else:
 
@@ -463,7 +461,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                 CURRENTLY_PENDING_RENAME.remove(new_file_path)
                 return
 
-        manga_metadata = Metadata(series_title, logging_info, anilist_details)
+        manga_metadata = Metadata(manga_title, logging_info, anilist_details)
         logging_info['metadata'] = manga_metadata.__dict__
 
         if series_title in ProcSeriesTable.processed_series:
