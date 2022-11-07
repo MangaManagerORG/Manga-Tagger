@@ -68,13 +68,12 @@ def process_manga_chapter(file_path: Path, event_id):
     metadata_tagger(file_path, manga_details[0], manga_details[1], manga_details[2], logging_info, manga_details[3])
 
     # Remove manga directory if empty
-    try:
-        LOG.info(f'Deleting {directory_path}...')
-        if directory_path != AppSettings.download_dir:
+    if not any(directory_path.iterdir()) and directory_path != AppSettings.download_dir:
+        try:
             LOG.info(f'Deleting {directory_path}...')
             directory_path.rmdir()
-    except OSError as e:
-        LOG.info("Error: %s : %s" % (directory_path, e.strerror))
+        except OSError as e:
+            LOG.info("Error: %s : %s" % (directory_path, e.strerror))
 
 
 def filename_parser(filename, logging_info):
@@ -392,9 +391,9 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                 LOG.info('Downloading series cover image...', extra=logging_info)
                 download_cover_image(series_title, anilist_details['coverImage']['extraLarge'])
             else:
-                LOG.info('Series cover image already exist, not downloading.', extra=logging_info)
+                LOG.debug('Series cover image already exist, not downloading.', extra=logging_info)
         else:
-            LOG.info('Image flag not set, not downloading series cover image.', extra=logging_info)
+            LOG.debug('Image flag not set, not downloading series cover image.', extra=logging_info)
 
 
 
@@ -486,7 +485,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                 LOG.info(f'Image directory configured but cover not found. Downloading series cover image...', extra=logging_info)
                 download_cover_image(series_title, anilist_details['coverImage']['extraLarge'])
             else:
-                LOG.info('Series cover image already exist, not downloading.', extra=logging_info)
+                LOG.debug('Series cover image already exist, not downloading.', extra=logging_info)
         comicinfo_xml = construct_comicinfo_xml(manga_metadata, manga_chapter_number, logging_info, volume)
         reconstruct_manga_chapter(series_title, comicinfo_xml, new_file_path, logging_info)
         if AppSettings.image and (not AppSettings.image_first or (AppSettings.image_first and int(float(manga_chapter_number))==1)):
@@ -608,6 +607,7 @@ def reconstruct_manga_chapter(manga_title, comicinfo_xml, manga_file_path, loggi
         return
     LOG.info(f'ComicInfo.xml has been created and appended to "{manga_file_path}".', extra=logging_info)
 
+
 def add_cover_to_manga_chapter(manga_title, manga_file_path, logging_info):
     try:
         with ZipFile(manga_file_path, 'a') as zipfile:
@@ -619,6 +619,7 @@ def add_cover_to_manga_chapter(manga_title, manga_file_path, logging_info):
                     extra=logging_info)
         return
     LOG.info(f'Cover Image has been added to "{manga_file_path}".', extra=logging_info)
+
 
 def download_cover_image(manga_title, image_url):
     image = requests.get(image_url)
