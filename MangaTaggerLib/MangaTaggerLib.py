@@ -272,9 +272,7 @@ def compare_versions(old_filename: str, new_filename: str):
 
 
 def metadata_tagger(file_path, manga_title, manga_chapter_number, format, logging_info, volume):
-    manga_search = None
     db_exists = True
-    retries = 0
     isadult = False
     anilist_id = None
 
@@ -296,43 +294,42 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                 manga_title = exceptions[manga_title]['anilist_title']
 
     LOG.info(f'Table search value is "{manga_title}"', extra=logging_info)
-    while manga_search is None:
-        if retries == 0:
-            if anilist_id is not None:
-                LOG.info('Searching manga_metadata for anilist id.', extra=logging_info)
-                manga_search = MetadataTable.search_by_search_id(anilist_id)
-            else:
-                LOG.info('Searching manga_metadata for manga title by search value...', extra=logging_info)
-                manga_search = MetadataTable.search_by_search_value(manga_title)
-            retries = 1
-        else:  # The manga is not in the database, so ping the API and create the database
-            LOG.info('Manga was not found in the database; resorting to Anilist API.', extra=logging_info)
-            try:
-                if anilist_id:
-                    LOG.info('Searching based on id given in exception file. ')
-                    manga_search = AniList.search_for_manga_title_by_id(anilist_id, logging_info)
-                elif isadult:  # enable adult result in Anilist
-                    LOG.info('Adult result enabled')
-                    manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
-                else:
-                    manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
-            except AniListRateLimit as e:
-                LOG.warning(e, extra=logging_info)
-                LOG.warning('Manga Tagger has unintentionally breached the API limits on Anilist. Waiting 60s to clear '
-                            'all rate limiting limits...')
-                time.sleep(60)
-                if anilist_id:
-                    LOG.info('Searching based on id given in exception file: ')
-                    manga_search = AniList.search_for_manga_title_by_id(anilist_id, logging_info)
-                elif isadult:  # enable adult result in Anilist
-                    LOG.info('Adult result enabled')
-                    manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
-                else:
-                    manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
-            if manga_search is None:
-                raise MangaNotFoundError(manga_title)
-            db_exists = False
+    
+    if anilist_id is not None:
+        LOG.info('Searching manga_metadata for anilist id.', extra=logging_info)
+        manga_search = MetadataTable.search_by_search_id(anilist_id)
+    else:
+        LOG.info('Searching manga_metadata for manga title by search value...', extra=logging_info)
+        manga_search = MetadataTable.search_by_search_value(manga_title)
 
+    if manga_search is None:  # The manga is not in the database, so ping the API and create the database
+        LOG.info('Manga was not found in the database; resorting to Anilist API.', extra=logging_info)
+        try:
+            if anilist_id:
+                LOG.info('Searching based on id given in exception file. ')
+                manga_search = AniList.search_for_manga_title_by_id(anilist_id, logging_info)
+            elif isadult:  # enable adult result in Anilist
+                LOG.info('Adult result enabled')
+                manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
+            else:
+                manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
+        except AniListRateLimit as e:
+            LOG.warning(e, extra=logging_info)
+            LOG.warning('Manga Tagger has unintentionally breached the API limits on Anilist. Waiting 60s to clear '
+                        'all rate limiting limits...')
+            time.sleep(60)
+            if anilist_id:
+                LOG.info('Searching based on id given in exception file: ')
+                manga_search = AniList.search_for_manga_title_by_id(anilist_id, logging_info)
+            elif isadult:  # enable adult result in Anilist
+                LOG.info('Adult result enabled')
+                manga_search = AniList.search_for_manga_title_by_manga_title_with_adult(manga_title, format, logging_info)
+            else:
+                manga_search = AniList.search_for_manga_title_by_manga_title(manga_title, format, logging_info)
+        if manga_search is None:
+            raise MangaNotFoundError(manga_title)
+        db_exists = False
+    
     if db_exists:
         series_title = MetadataTable.search_series_title(manga_title)
         series_title_legal = slugify(series_title)
@@ -348,6 +345,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
             return None
         new_file_path = Path(manga_library_dir, new_filename)
 
+        
         if AppSettings.mode_settings is None or AppSettings.mode_settings['rename_file']:
             if not manga_library_dir.exists():
                 LOG.info(
@@ -375,6 +373,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                 LOG.exception(e, extra=logging_info)
                 CURRENTLY_PENDING_RENAME.remove(new_file_path)
                 return
+        
 
         if manga_title in ProcSeriesTable.processed_series:
             LOG.info(f'Found an entry in manga_metadata for "{manga_title}".', extra=logging_info)
@@ -383,6 +382,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                      extra=logging_info)
             ProcSeriesTable.processed_series.add(manga_title)
 
+        
         if AppSettings.image:
             if not Path(f'{AppSettings.image_dir}/{series_title_legal}_cover.jpg').exists():
                 LOG.info(f'Image directory configured but cover not found. Send request to Anilist for necessary data.',extra=logging_info)
@@ -394,6 +394,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                 LOG.debug('Series cover image already exist, not downloading.', extra=logging_info)
         else:
             LOG.debug('Image flag not set, not downloading series cover image.', extra=logging_info)
+        
 
         manga_metadata = Metadata(manga_title, logging_info, details=manga_search)
         logging_info['metadata'] = manga_metadata.__dict__
@@ -437,6 +438,8 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                 LOG.info(
                     f'A directory for "{series_title}" in "{AppSettings.library_dir}" does not exist; creating now.')
                 manga_library_dir.mkdir()
+
+            
             try:
                 # Multithreading Optimization
                 if new_file_path in CURRENTLY_PENDING_RENAME:
@@ -460,10 +463,12 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                 LOG.exception(e, extra=logging_info)
                 CURRENTLY_PENDING_RENAME.remove(new_file_path)
                 return
+            
 
         manga_metadata = Metadata(manga_title, logging_info, anilist_details)
         logging_info['metadata'] = manga_metadata.__dict__
 
+        
         if series_title in ProcSeriesTable.processed_series:
             LOG.info(
                 f'Found an entry in manga_metadata for "{series_title}". Filename was probably not perfectly named according to MAL. Not adding metadata to MetadataTable.',
@@ -475,7 +480,8 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
             LOG.info(f'Retrieved metadata for "{series_title}" from the Anilist and MyAnimeList APIs; '
                      f'now unlocking series for processing!', extra=logging_info)
             ProcSeriesTable.processed_series.add(series_title)
-
+        
+    
     if AppSettings.mode_settings is None or ('write_comicinfo' in AppSettings.mode_settings.keys()
                                              and AppSettings.mode_settings['write_comicinfo']):
         if AppSettings.image:
@@ -488,7 +494,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
         reconstruct_manga_chapter(comicinfo_xml, new_file_path, logging_info)
         if AppSettings.image and (not AppSettings.image_first or (AppSettings.image_first and int(float(manga_chapter_number))==1)):
             add_cover_to_manga_chapter(series_title_legal, new_file_path, logging_info)
-
+    
     LOG.info(f'Processing on "{new_file_path}" has finished.', extra=logging_info)
     return manga_metadata
 
@@ -645,3 +651,4 @@ def slugify(value, allow_unicode=False):
 
 def hasNumbers(inputString):
     return bool(re.search(r'\d', inputString))
+

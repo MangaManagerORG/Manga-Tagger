@@ -154,7 +154,6 @@ class MetadataTable(Database):
             {'synonyms': manga_title}
         ]})
 
-
     @classmethod
     def search_id_by_search_value(cls, manga_title):
         cls._log.debug(f'Searching "series_id" using value "{manga_title}"')
