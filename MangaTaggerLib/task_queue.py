@@ -13,6 +13,7 @@ from watchdog.observers.polling import PollingObserver
 
 from MangaTaggerLib import MangaTaggerLib
 from MangaTaggerLib.database import TaskQueueTable
+from MangaTaggerLib.errors import MangaNotFoundError
 
 
 class QueueEventOrigin(Enum):
@@ -42,7 +43,7 @@ class QueueEvent:
             self.src_path = event
 
     def __str__(self):
-        if self.event_type in ('created', 'existing'):
+        if self.event_type in ('existing','closed'):
             return f'File {self.event_type} event at {self.src_path.absolute()}'
         elif self.event_type == 'modified':
             return f'File {self.event_type} event at {self.dest_path.absolute()}'
@@ -163,7 +164,7 @@ class QueueWorker:
             if not cls._queue.empty():
                 event = cls._queue.get()
 
-                if event.event_type in ('created', 'existing'):
+                if event.event_type in ('closed', 'existing'):
                     cls._log.info(f'Pulling "file {event.event_type}" event from the queue for "{event.src_path}"')
                     path = Path(event.src_path)
                 elif event.event_type == 'moved':
@@ -186,6 +187,10 @@ class QueueWorker:
 
                 try:
                     MangaTaggerLib.process_manga_chapter(path, uuid.uuid1())
+                except MangaNotFoundError as mnfe:
+                    cls._log.exception(mnfe)
+                    cls._log.warning('Cannot find the manga using the filename provided,'
+                                     ' you may need to add this title to your exceptions file.')
                 except Exception as e:
                     cls._log.exception(e)
                     cls._log.warning('Manga Tagger is unfamiliar with this error. Please log an issue for '
@@ -211,12 +216,12 @@ class SeriesHandler(PatternMatchingEventHandler):
         self.queue = queue
         self._log.debug(f'{self.class_name()} class has been initialized')
 
-    def on_created(self, event):
+    def on_closed(self, event):
         self._log.debug(f'Event Type: {event.event_type}')
         self._log.debug(f'Event Path: {event.src_path}')
 
         self.queue.put(QueueEvent(event, QueueEventOrigin.WATCHDOG))
-        self._log.info(f'Creation event for "{event.src_path}" will be added to the queue')
+        self._log.info(f'on_closed event for "{event.src_path}" will be added to the queue')
 
     def on_moved(self, event):
         self._log.debug(f'Event Type: {event.event_type}')
