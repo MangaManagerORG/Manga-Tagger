@@ -1,8 +1,20 @@
 import logging
 import requests
-import time
-from datetime import datetime
-from typing import Optional, Dict, Mapping, Union, Any
+from ratelimit import limits, sleep_and_retry
+
+# https://anilist.gitbook.io/anilist-apiv2-docs/overview/rate-limiting
+# Will limit to 60 calls per minute, 30 under the max
+# With the changes that have been made we shouldn't hit this limit.
+# As we are multithreading Run this to be a global limit as opposed to a class defined limit
+CALLS = 60
+RATE_LIMIT = 60
+@sleep_and_retry
+@limits(calls=CALLS, period=RATE_LIMIT)
+def check_limit():
+    """
+    Empty function just to check for calls to API
+    """
+    return
 
 class AniList:
     _log = None
@@ -13,6 +25,7 @@ class AniList:
 
     @classmethod
     def _post(cls, query, variables, logging_info):
+        check_limit()
         try:
             response = requests.post('https://graphql.anilist.co', json={'query': query, 'variables': variables})
             if response.status_code == 429:  # Anilist rate-limit code
@@ -30,74 +43,6 @@ class AniList:
             return response.json()['data']['Media']
         except TypeError:
             return None
-
-    @classmethod
-    def search_for_manga_title_by_id(cls, manga_id, logging_info):
-        query = '''
-        query search_for_manga_title_by_id ($manga_id: Int) {
-          Media (id: $manga_id, type: MANGA) {
-            id
-            title {
-              romaji
-              english
-              native
-            }
-            synonyms
-          }
-        }
-        '''
-
-        variables = {
-            'manga_id': manga_id,
-        }
-
-        return cls._post(query, variables, logging_info)
-
-    @classmethod
-    def search_for_manga_title_by_manga_title(cls, manga_title, format, logging_info):
-        query = '''
-        query search_manga_by_manga_title ($manga_title: String, $format: MediaFormat) {
-          Media (search: $manga_title, type: MANGA, format: $format, isAdult: false) {
-            id
-            title {
-              romaji
-              english
-              native
-            }
-            synonyms
-          }
-        }
-        '''
-
-        variables = {
-            'manga_title': manga_title,
-            'format': format
-        }
-
-        return cls._post(query, variables, logging_info)
-
-    @classmethod
-    def search_for_manga_title_by_manga_title_with_adult(cls, manga_title, format, logging_info):
-        query = '''
-        query search_manga_by_manga_title ($manga_title: String, $format: MediaFormat) {
-          Media (search: $manga_title, type: MANGA, format: $format) {
-            id
-            title {
-              romaji
-              english
-              native
-            }
-            synonyms
-          }
-        }
-        '''
-
-        variables = {
-            'manga_title': manga_title,
-            'format': format
-        }
-
-        return cls._post(query, variables, logging_info)
 
     @classmethod
     def search_details_by_series_id(cls, series_id, format, logging_info):
@@ -150,6 +95,57 @@ class AniList:
         
         return cls._post(query, variables, logging_info)
 
+    @classmethod
+    def search_details_by_series_title(cls, manga_title, isAdult, format, logging_info):
+        query = '''
+        query search_details_by_series_title ($manga_title: String, $isAdult: Boolean, $format: MediaFormat) {
+          Media (search: $manga_title, type: MANGA, format: $format, isAdult: $isAdult) {
+            id
+            status
+            volumes
+            siteUrl
+            title {
+              romaji
+              english
+              native
+            }
+            type
+            genres
+            synonyms
+            startDate {
+              day
+              month
+              year
+            }
+            coverImage {
+              extraLarge
+            }
+            staff {
+              edges {
+                node{
+                  name {
+                    first
+                    last
+                    full
+                    alternative
+                  }
+                  siteUrl
+                }
+                role
+              }
+            }
+            description
+          }
+        }
+        '''
+
+        variables = {
+            'manga_title': manga_title,
+            'isAdult': isAdult,
+            'format': format
+        }
+
+        return cls._post(query, variables, logging_info)
 
 class AniListRateLimit(Exception):
     """

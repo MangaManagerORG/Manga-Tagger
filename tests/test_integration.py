@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -72,7 +71,7 @@ class TestMetadata(unittest.TestCase):
             anilist_details = json.load(data)
 
         expected_manga_metadata = Metadata(title, {}, anilist_details)
-        actual_manga_metadata = metadata_tagger("NOWHERE", title, '001', "MANGA", {}, None)
+        actual_manga_metadata = metadata_tagger("NOWHERE", title, '001', "MANGA", {}, None, None)
 
         self.assertEqual(expected_manga_metadata.test_value(), actual_manga_metadata.test_value())
 
@@ -86,7 +85,7 @@ class TestMetadata(unittest.TestCase):
             anilist_details = json.load(data)
 
         expected_manga_metadata = Metadata(title, {}, anilist_details)
-        actual_manga_metadata = metadata_tagger("NOWHERE", title, '001', "MANGA", {}, None)
+        actual_manga_metadata = metadata_tagger("NOWHERE", title, '001', "MANGA", {}, None, None)
 
         self.assertEqual(expected_manga_metadata.test_value(), actual_manga_metadata.test_value())
 
@@ -102,7 +101,7 @@ class TestMetadata(unittest.TestCase):
             anilist_details = json.load(data)
 
         expected_manga_metadata = Metadata(title, {}, anilist_details)
-        actual_manga_metadata = metadata_tagger("NOWHERE", downloaded_title, '001', "MANGA", {}, None)
+        actual_manga_metadata = metadata_tagger("NOWHERE", downloaded_title, '001', "MANGA", {}, None, None)
 
         self.assertEqual(expected_manga_metadata.test_value(), actual_manga_metadata.test_value())
 
@@ -117,7 +116,7 @@ class TestMetadata(unittest.TestCase):
             anilist_details = json.load(data)
 
         expected_manga_metadata = Metadata(title, {}, anilist_details)
-        actual_manga_metadata = metadata_tagger("NOWHERE", downloaded_title, '001', "MANGA", {}, None)
+        actual_manga_metadata = metadata_tagger("NOWHERE", downloaded_title, '001', "MANGA", {}, None, None)
 
         self.assertEqual(expected_manga_metadata.test_value(), actual_manga_metadata.test_value())
 
@@ -131,6 +130,6 @@ class TestMetadata(unittest.TestCase):
             anilist_details = json.load(data)
 
         expected_manga_metadata = Metadata(title, {}, anilist_details)
-        actual_manga_metadata = metadata_tagger("NOWHERE", title, '001', "ONE_SHOT", {}, None)
+        actual_manga_metadata = metadata_tagger("NOWHERE", title, '001', "ONE_SHOT", {}, None, None)
 
         self.assertNotEqual(expected_manga_metadata.test_value(), actual_manga_metadata.test_value())

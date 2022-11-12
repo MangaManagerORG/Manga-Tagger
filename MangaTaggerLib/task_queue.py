@@ -199,6 +199,7 @@ class QueueWorker:
                 cls._queue.task_done()
             time.sleep(1)
 
+
 class SeriesHandler(PatternMatchingEventHandler):
     _log = None
 
@@ -228,6 +229,9 @@ class SeriesHandler(PatternMatchingEventHandler):
         self._log.debug(f'Event Source Path: {event.src_path}')
         self._log.debug(f'Event Destination Path: {event.dest_path}')
 
+        # TODO
+        # check if the destination path is below the appsettings processing folder path
+        # don't check that a file is moved in place.
         if Path(event.src_path) == Path(event.dest_path) and '-.-' in event.dest_path:
             self.queue.put(QueueEvent(event, QueueEventOrigin.WATCHDOG))
-        self._log.info(f'Moved event for "{event.dest_path}" will be added to the queue')
+            self._log.info(f'Moved event for "{event.dest_path}" will be added to the queue')

@@ -124,6 +124,10 @@ class Metadata:
             if a_staff['node']['name']['first'] is not None:
                 anilist_staff_name += ', ' + a_staff['node']['name']['first']
 
+            # Remove the period from the key to support older versions of mongodb
+            if a_staff['node']['name']['full'] is not None:
+                a_staff['node']['name']['full'] = a_staff['node']['name']['full'].replace(".", "")
+
             names_to_compare = [anilist_staff_name]
             if '' not in a_staff['node']['name']['alternative']:
                 for name in a_staff['node']['name']['alternative']:
