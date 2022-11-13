@@ -297,7 +297,7 @@ def search_the_api(manga_title, anilist_id, format, isadult, logging_info):
         return AniList.search_details_by_series_title( manga_title, isadult, format, logging_info)
 
 
-def metadata_tagger(file_path, manga_title, manga_chapter_number, format, logging_info, volume, anilist_id):
+def metadata_tagger(file_path, manga_title, manga_chapter_number, format, logging_info, volume, anilist_id=None):
     """Return a Metadata Object
 
     Checks to see if the manga title is in the exceptions list
