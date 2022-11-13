@@ -591,6 +591,9 @@ def construct_comicinfo_xml(metadata: Metadata, chapter_number, logging_info, vo
 
 
 def reconstruct_manga_chapter(comicinfo_xml, manga_file_path, logging_info):
+    if not path.exists(manga_file_path):
+        LOG.Warning(f'{manga_file_path} was not created, cannot add the ComicInfo.xml file')
+        return
     try:
         with ZipFile(manga_file_path, 'a') as zipfile:
             zipfile.writestr('ComicInfo.xml', comicinfo_xml)
@@ -603,6 +606,9 @@ def reconstruct_manga_chapter(comicinfo_xml, manga_file_path, logging_info):
 
 
 def add_cover_to_manga_chapter(manga_title, manga_file_path, logging_info):
+    if not path.exists(manga_file_path):
+        LOG.Warning(f'{manga_file_path} was not created, cannot add the Cover image')
+        return
     try:
         with ZipFile(manga_file_path, 'a') as zipfile:
             if AppSettings.image and Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
