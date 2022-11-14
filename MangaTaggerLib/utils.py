@@ -224,7 +224,7 @@ class AppSettings:
         # Image Directory
         if settings['application']['image']['enabled']:
             cls.image = True
-            if settings['application']['image']['first']:
+            if settings['application']['image'].get('first'):
                 cls.image_first = True
             if settings['application']['image']['image_dir'] is not None:
                 if settings['application']['image']['image_dir'] is not None:
