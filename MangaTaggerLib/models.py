@@ -188,3 +188,4 @@ class Metadata:
             'staff': self.staff,
 #            'serializations': self.serializations
         }
+        

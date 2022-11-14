@@ -283,7 +283,6 @@ def compare_versions(old_filename: str, new_filename: str):
     else:
         return False
 
-
 def search_the_api(manga_title, anilist_id, format, isadult, logging_info):
     """Return an Anilist with full search results
 
@@ -351,6 +350,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
             LOG.info(f'Re-attempting API Lookup "{manga_title}" without the adult tag set.', extra=logging_info)
             try:
                 anilist_details = search_the_api(manga_title, anilist_id, format, False, logging_info)
+
             except AniListRateLimit as e:
                 LOG.warning(e, extra=logging_info)
                 LOG.warning('Manga Tagger has unintentionally breached the API limits on Anilist. Waiting 60s to clear '
@@ -596,6 +596,17 @@ def reconstruct_manga_chapter(comicinfo_xml, manga_file_path, logging_info):
         return
     LOG.info(f'ComicInfo.xml has been created and appended to "{manga_file_path}".', extra=logging_info)
 
+def add_cover_to_manga_chapter(manga_title, manga_file_path, logging_info):
+    try:
+        with ZipFile(manga_file_path, 'a') as zipfile:
+            if AppSettings.image and Path(f'{AppSettings.image_dir}/{manga_title}_cover.jpg').exists():
+                zipfile.write(f'{AppSettings.image_dir}/{manga_title}_cover.jpg', '000_cover.jpg')
+    except Exception as e:
+        LOG.exception(e, extra=logging_info)
+        LOG.warning('Manga Tagger is unfamiliar with this error. Please log an issue for investigation.',
+                    extra=logging_info)
+        return
+    LOG.info(f'Cover Image has been added to "{manga_file_path}".', extra=logging_info)
 
 def add_cover_to_manga_chapter(manga_title, manga_file_path, logging_info):
     if not path.exists(manga_file_path):
