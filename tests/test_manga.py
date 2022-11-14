@@ -72,7 +72,7 @@ class TestMangaRenameAction(unittest.TestCase):
     def setUpClass(cls) -> None:
         logging.disable(logging.CRITICAL)
         cls.current_file = Path(cls.download_dir, 'Absolute Boyfriend -.- Absolute Boyfriend 01 Lover Shop.cbz')
-        cls.new_file = Path(cls.library_dir, 'Absolute Boyfriend 001.cbz')
+        cls.new_file = Path(cls.library_dir, 'Absolute Boyfriend Ch.001.cbz')
 
     def setUp(self) -> None:
         self.download_dir.mkdir()
@@ -91,7 +91,7 @@ class TestMangaRenameAction(unittest.TestCase):
         self.current_file.touch()
         ProcFilesTable.search = ProcFilesTableTest.search_return_no_results
 
-        CURRENTLY_PENDING_RENAME.append(self.new_file)
+        CURRENTLY_PENDING_RENAME.append(str(self.new_file))
 
         self.assertFalse(rename_action(self.current_file, self.new_file, 'Absolute Boyfriend', '01', {}))
 
@@ -144,7 +144,7 @@ class TestMangaRenameAction(unittest.TestCase):
         self.current_file.touch()
 
         self.new_file.touch()
-        CURRENTLY_PENDING_RENAME.append(self.new_file)
+        CURRENTLY_PENDING_RENAME.append(str(self.new_file))
 
         ProcFilesTable.search = ProcFilesTableTest.search_return_results_version
 
