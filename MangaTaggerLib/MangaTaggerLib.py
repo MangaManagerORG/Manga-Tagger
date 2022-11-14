@@ -245,8 +245,8 @@ def rename_action(current_file_path: Path, new_file_path: Path, manga_title, cha
                 raise FileAlreadyProcessedError(current_file_path.name)
 
     LOG.info(f'"{new_file_path.name}" will be unlocked for any pending processes.', extra=logging_info)
-    CURRENTLY_PENDING_RENAME.remove(str(new_file_path))
-
+    if str(new_file_path) in CURRENTLY_PENDING_RENAME:
+        CURRENTLY_PENDING_RENAME.remove(str(new_file_path))
 
 def compare_versions(old_filename: str, new_filename: str):
     old_version = 0
