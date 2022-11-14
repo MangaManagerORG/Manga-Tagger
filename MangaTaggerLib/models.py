@@ -55,10 +55,12 @@ class Metadata:
         self.anilist_url = anilist_details['siteUrl']
         self.publish_date = None
         self.genres = []
+        self.synonyms = []
         self.staff = {}
 
         self._construct_publish_date(anilist_details['startDate'])
         self._parse_genres(anilist_details['genres'], logging_info)
+        self._parse_synonyms(anilist_details.get('synonyms'), logging_info)
         self._parse_staff(anilist_details['staff']['edges'], logging_info)
 
         self.scrape_date = timezone(AppSettings.timezone).localize(datetime.now()).strftime('%Y-%m-%d %I:%M %p %Z')
@@ -75,6 +77,7 @@ class Metadata:
         self.anilist_url = details['anilist_url']
         self.publish_date = details['publish_date']
         self.genres = details['genres']
+        self.synonyms = details['synonyms']
         self.staff = details['staff']
         self.publish_date = details['publish_date']
         self.scrape_date = details['scrape_date']
@@ -90,9 +93,13 @@ class Metadata:
 
     def _parse_genres(self, genres, logging_info):
         Metadata._log.info('Parsing genres...', extra=logging_info)
-        for genre in genres:
-            Metadata._log.debug(f'Genre found: {genre}')
-            self.genres.append(genre)
+        Metadata._log.debug(f'Genre found: {", ".join(genres)}')
+        self.genres.extend(genres)
+
+    def _parse_synonyms(self, synonyms, logging_info):
+        Metadata._log.info('Parsing Synonyms...', extra=logging_info)
+        Metadata._log.debug(f'Synonyms found: {synonyms}')
+        self.synonyms.extend(synonyms or [])
 
     def _parse_staff(self, anilist_staff, logging_info):
         Metadata._log.info('Parsing staff roles...', extra=logging_info)
@@ -171,6 +178,7 @@ class Metadata:
             'anilist_url': self.anilist_url,
             'publish_date': self.publish_date,
             'genres': self.genres,
+            'synonyms': self.synonyms,
             'staff': self.staff,
 #            'serializations': self.serializations
         }
