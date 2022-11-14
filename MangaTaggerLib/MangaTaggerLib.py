@@ -308,6 +308,7 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
     """
 
     isadult = AppSettings.adult_result
+    anilist_details = None
 
     if Path(f'{AppSettings.data_dir}/exceptions.json').exists():
         with open(f'{AppSettings.data_dir}/exceptions.json', 'r') as exceptions_json:
@@ -328,12 +329,6 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
         LOG.info(f'Skipping "{manga_title}". API found nothing when last attempted'
                  f'Try adding an exception to the exception.json list.', extra=logging_info)
         return None
-    # if manga_title in CURRENTLY_PENDING_API_REQUEST:
-    #     LOG.info(f'A Search is currently being made for "{manga_title}". Locking API '
-    #              f'Until this lookup is complete...', extra=logging_info)
-    #
-    #     while manga_title in CURRENTLY_PENDING_API_REQUEST:
-    #         time.sleep(1)
 
     if anilist_id is not None:
         LOG.info('Searching manga_metadata for anilist id.', extra=logging_info)
@@ -343,7 +338,6 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
         meta_table_details = MetadataTable.search_by_search_value(manga_title)
 
     if meta_table_details is None:  # The manga is not in the database, so ping the API and create the database
-        # CURRENTLY_PENDING_API_REQUEST.add(manga_title)
         LOG.info('Manga was not found in the database; resorting to Anilist API.', extra=logging_info)
         try:
             anilist_details = search_the_api(manga_title, anilist_id, format, isadult, logging_info)
@@ -365,7 +359,6 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                 anilist_details = search_the_api(manga_title, anilist_id, format, False, logging_info)
         if anilist_details is None:
             LOG.info(f'API Lookup failed for "{manga_title}" Unlocking...', extra=logging_info)
-            # CURRENTLY_PENDING_API_REQUEST.remove(manga_title)
             SKIP_MANGA.add(manga_title)
             raise MangaNotFoundError(manga_title)
 
@@ -373,15 +366,12 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
             add_to_metadata_table(manga_title, anilist_details, logging_info)
         except:
             LOG.info(f'Database Insert failed with API for "{manga_title}" Unlocking...', extra=logging_info)
-            # CURRENTLY_PENDING_API_REQUEST.remove(manga_title)
             raise()
+        series_title = anilist_details['title']['romaji']
         LOG.info(f'API Lookup Succeeded for "{manga_title}" Unlocking...', extra=logging_info)
-        # CURRENTLY_PENDING_API_REQUEST.remove(manga_title)
+    else:
+        series_title = meta_table_details.get('series_title')
 
-        meta_table_details = MetadataTable.search_by_search_value(manga_title)
-        first = True
-
-    series_title = meta_table_details.get('series_title')
     series_title_legal = slugify(series_title)
     manga_library_dir = Path(AppSettings.library_dir, series_title_legal)
     #TODO take in a template for new filename
@@ -434,7 +424,9 @@ def metadata_tagger(file_path, manga_title, manga_chapter_number, format, loggin
                  extra=logging_info)
         ProcSeriesTable.processed_series.add(manga_title)
 
-    manga_metadata = Metadata(manga_title, logging_info, details=meta_table_details)
+
+    manga_metadata = Metadata(manga_title, logging_info, anilist_details, details=meta_table_details)
+
     logging_info['metadata'] = manga_metadata.__dict__
 
     if AppSettings.mode_settings is None or ('write_comicinfo' in AppSettings.mode_settings.keys()
