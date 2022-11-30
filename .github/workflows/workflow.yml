@@ -5,7 +5,8 @@ name: Python tests & Build
 on:
   - push
 #  - pull_request
-
+env:
+  IMAGE_NAME: "banhcanh/manga-tagger"
 jobs:
   build:
     #    env:
