@@ -443,14 +443,37 @@ class AppSettings:
                 if manga_chapter.name.strip('.cbz') not in QueueWorker.task_list.keys():
                     QueueWorker.add_to_task_queue(manga_chapter)
 
+def levenshtein_distance_no_numpy(s1, s2):
+    """
+    Calculates the Levenshtein distance between two strings without using NumPy.
 
+    Args:
+        s1 (str): The first string.
+        s2 (str): The second string.
+
+    Returns:
+        int: The Levenshtein distance between the two strings.
+    """
+
+    rows = len(s1) + 1
+    cols = len(s2) + 1
+    distance = [[0 for _ in range(cols)] for _ in range(rows)]
+
+    for i in range(1, rows):
+        for j in range(1, cols):
+            if s1[i - 1] == s2[j - 1]:
+                distance[i][j] = distance[i - 1][j - 1]
+            else:
+                distance[i][j] = min(distance[i - 1][j] + 1, distance[i][j - 1] + 1, distance[i - 1][j - 1] + 1)
+
+    return distance[rows - 1][cols - 1]
 def compare(s1, s2):
     s1 = s1.lower().strip('/[^a-zA-Z ]/g", ')
     s2 = s2.lower().strip('/[^a-zA-Z ]/g", ')
 
     rows = len(s1) + 1
     cols = len(s2) + 1
-    distance = numpy.zeros((rows, cols), int)
+    distance = levenshtein_distance_no_numpy(s1, s2)
 
     for i in range(1, rows):
         distance[i][0] = i

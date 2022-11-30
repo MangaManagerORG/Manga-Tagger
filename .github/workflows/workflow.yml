@@ -1,0 +1,99 @@
+# This workflow file will install Python dependencies,
+# create a desktop, joystick, and test the application's GUI on multiple versions of Python
+name: Python tests & Build
+
+on:
+  - push
+#  - pull_request
+env:
+  IMAGE_NAME: "banhcanh/manga-tagger"
+jobs:
+  build:
+    #    env:
+    #      DISPLAY: ":99.0"
+    runs-on: ubuntu-latest
+    strategy:
+        matrix:
+            python-version: [ '3.8','3.9', ]
+    name: Python ${{ matrix.python-version }} sample
+    steps:
+      -   uses: actions/checkout@v3
+      -   uses: actions/setup-python@v3
+          with:
+              python-version: ${{ matrix.python-version }}
+              cache: 'pip'
+      -   run: pip install -r requirements.txt
+      -   name: Run the tests
+          run: python3 -m unittest discover -s tests -t .
+#  sonarcloud:
+#    name: SonarCloud
+#    runs-on: ubuntu-latest
+#    steps:
+#      -   uses: actions/checkout@v2
+#          with:
+#            fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+#      -   name: SonarCloud Scan
+#          uses: SonarSource/sonarcloud-github-action@master
+#          env:
+#            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+#            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  docker_develop:
+    name: Nightly Build
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}  # Only run in develop push
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:nightly
+  docker_stable:
+    name: Stable Build
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}   # Only run in master push
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:latest
+  docker_test:
+    name: Test Build
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/test' }}  # Only run in test push
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:test
