@@ -75,8 +75,8 @@ class TestMangaRenameAction(unittest.TestCase):
         cls.new_file = Path(cls.library_dir, 'Absolute Boyfriend 001.cbz')
 
     def setUp(self) -> None:
-        self.download_dir.mkdir()
-        self.library_dir.mkdir()
+        self.download_dir.mkdir(exist_ok=True)
+        self.library_dir.mkdir(exist_ok=True)
 
     def tearDown(self) -> None:
         shutil.rmtree(self.download_dir)
