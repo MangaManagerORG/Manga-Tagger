@@ -115,7 +115,7 @@ class TestMetadata(unittest.TestCase):
 
         with open(Path(self.data_dir, title, self.data_file), encoding='utf-8') as data:
             anilist_details = json.load(data)
-
+        self.MangaTaggerLib_AppSettings.adult_result = False
         expected_manga_metadata = Metadata(title, {}, anilist_details)
         actual_manga_metadata = metadata_tagger("NOWHERE", downloaded_title, '001', "MANGA", {}, None)
 

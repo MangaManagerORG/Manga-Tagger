@@ -464,7 +464,7 @@ def levenshtein_distance_no_numpy(s1, s2):
             else:
                 distance[i][j] = min(distance[i - 1][j] + 1, distance[i][j - 1] + 1, distance[i - 1][j - 1] + 1)
 
-    return distance[rows - 1][cols - 1]
+    return distance
 def compare(s1, s2):
     s1 = s1.lower().strip('/[^a-zA-Z ]/g", ')
     s2 = s2.lower().strip('/[^a-zA-Z ]/g", ')
