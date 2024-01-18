@@ -8,8 +8,6 @@ import os
 from logging.handlers import RotatingFileHandler, SocketHandler
 from pathlib import Path
 
-import numpy
-import psutil
 from pythonjsonlogger import jsonlogger
 
 from MangaTaggerLib.database import Database
